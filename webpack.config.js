@@ -1,6 +1,5 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const resolve = (pathName) => (
   path.resolve(__dirname, pathName)
@@ -28,11 +27,7 @@ module.exports = {
       template: 'lottery.html',
       filename: 'lottery.html',
       chunks: ['lottery']
-    }),
-    new CopyWebpackPlugin([{
-      from: './public',
-      to: resolve('./dist')
-    }])
+    })
   ],
   devtool: 'source-map'
 }
