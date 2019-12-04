@@ -4697,6 +4697,11 @@ three-text2d-2@^0.3.8:
   resolved "https://registry.yarnpkg.com/three-text2d-2/-/three-text2d-2-0.3.8.tgz#0fed9929b318a6187bf46fa57d173182936805eb"
   integrity sha512-jlvjEPLtieXaP4UlYl7hSWw5WmVgPeDgSyUcmjLfAaL68nYU4NLUlCudmkbn7dSZ1v/WcjBJv+BlHzKfVv7aQg==
 
+three-text2d@0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/three-text2d/-/three-text2d-0.3.4.tgz#7dbf14c20d14ee9114dcd9bc9e90d3f1b1da25d7"
+  integrity sha1-fb8Uwg0U7pEU3Nm8npDT8bHaJdc=
+
 three@^0.87.1:
   version "0.87.1"
   resolved "https://registry.yarnpkg.com/three/-/three-0.87.1.tgz#466a34edc4543459ced9b9d7d276b65216fe2ba8"
