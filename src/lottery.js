@@ -5,18 +5,11 @@ window.onload = () => {
   }
   const lottery3d = window.lottery3d = new Lottery3d({
     backgroundImage: 'http://img.eventist.cn/hudong/threeBg.jpg',
-    backgroundType: '3D',
+    backgroundType: '2D',
     dom: document.getElementById('webgl'),
     rotationSpeed: 2,
     shineColor: '#FCECB7',
     animateSpendTime: 10,
-    openAnimates: [
-      'Sphere',
-      'Artascope',
-      'Grid',
-      'Helix',
-      'Logo'
-    ],
     callback
   })
 
