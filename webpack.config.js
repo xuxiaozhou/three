@@ -7,8 +7,8 @@ const resolve = (pathName) => (
 
 module.exports = {
   entry: {
-    main: './src/index.js',
-    lottery: './src/lottery.js'
+    main: './src/index.ts',
+    lottery: './src/lottery.ts'
   },
   output: {
     filename: '[name].js',
@@ -16,6 +16,17 @@ module.exports = {
   },
   devServer: {
     contentBase: './dist'
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js']
+  },
+  module: {
+    rules: [
+      {
+        test: /.ts$/,
+        loader: 'ts-loader'
+      }
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
