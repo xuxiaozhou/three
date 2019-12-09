@@ -1,5 +1,8 @@
 import {
+  PerspectiveCamera,
   WebGLRenderer,
+  Group,
+  Scene,
   CircleGeometry,
   PlaneGeometry,
   MeshBasicMaterial,
@@ -8,9 +11,9 @@ import {
   Vector3
 } from "three";
 import TWEEN from '@tweenjs/tween.js'
-import _, {random, sample} from 'lodash'
+import _ from 'lodash'
 import Fadeout from "../animate/Fadeout";
-import * as animatesEffect from '../animate/index'
+import * as animatesEffect from '../animate'
 import {IConfig, IUser, IOption, IPosition} from "../type";
 import Base from "./Base";
 
@@ -18,19 +21,26 @@ const TWEEN2 = new TWEEN.Group();
 
 class Sign3D extends Base {
   private objects: any[] = [];
+  private avatarSize: number = 35;
   private fadeout: Fadeout;
   private readonly openAnimates: string[];
+  private readonly shape: 'Circle' | 'Round';
   private lodashAnimates: any;
   private readonly animateSpendTime: number;
   private nowAnimate: any;
 
+  protected group: Group;
+  protected scene: Scene;
   protected counter: number = 1000;
+  protected animationFrame: number;
+  protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
 
   constructor(config: IConfig) {
     super(config);
-    const {animateSpendTime = 10, openAnimates} = config;
+    const {animateSpendTime = 10, openAnimates, shape = 'Round'} = config;
     this.openAnimates = openAnimates;
+    this.shape = shape;
     this.animateSpendTime = animateSpendTime;
     this.addUser = this.addUser.bind(this);
   }
@@ -48,7 +58,7 @@ class Sign3D extends Base {
     const {camera} = this;
     const object = await this.createMesh(user);
     this.scene.add(object);
-    const replaceIndex = random(0, this.nowAnimate.objs.length - 1);
+    const replaceIndex = _.random(0, this.nowAnimate.objs.length - 1);
     let replaceObj = this.objects[replaceIndex];
 
     let porperty = {};
@@ -153,6 +163,12 @@ class Sign3D extends Base {
     moveTo.start()
   }
 
+  public destroy() {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame)
+    }
+  }
+
   private async createMesh(user: IUser, position: false | IPosition = false) {
     const map = await this.getTexture(user.avatar);
     let Plane;
@@ -176,15 +192,15 @@ class Sign3D extends Base {
       mesh.position.z = Math.random() * 4000 - 2000;
       return mesh
     }
-    mesh.position.x = position.x;
-    mesh.position.y = position.y;
-    mesh.position.z = position.z;
+    mesh.position.x = (position as IPosition).x;
+    mesh.position.y = (position as IPosition).y;
+    mesh.position.z = (position as IPosition).z;
     return mesh
   }
 
   private async createMeshs() {
     for (let i = 0; i < this.counter; i += 1) {
-      const user = sample(this.$users);
+      const user = _.sample(this.$users);
       const object = await this.createMesh(user);
       this.group.add(object);
       this.objects.push(object)
@@ -308,6 +324,8 @@ class Sign3D extends Base {
 
   private async initThree() {
     try {
+      this.group = new Group();
+      this.scene = new Scene();
       this.initRender();
       const options: IOption = {
         counter: this.counter,

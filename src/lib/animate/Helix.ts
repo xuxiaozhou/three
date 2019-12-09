@@ -9,7 +9,7 @@ export default class Helix {
 
   public objs: any[];
 
-  constructor(options: IOption) {
+  public constructor(options: IOption) {
     const vector = new Vector3();
     this.group = options.group;
     this.camera = options.camera;
@@ -35,7 +35,7 @@ export default class Helix {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     const Time = 5000;
     const {camera, group, rotationSpeed} = this;
 
