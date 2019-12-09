@@ -97,7 +97,7 @@ export default class Sphere {
   /**
    * 摄像机旋转
    */
-  public cameraRotation(speed: number = 0.2) {
+  public cameraRotation(speed: number = 0.5) {
     if (!this.lon) {
       this.lon = 90
     }

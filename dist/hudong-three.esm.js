@@ -1,7 +1,7 @@
 import TWEEN from '@tweenjs/tween.js';
 import { MeshText2D } from 'three-text2d-2';
-import _, { get, sample, random } from 'lodash';
-import { Group, Scene, PerspectiveCamera, WebGLRenderer, TextureLoader, Vector3, Object3D, Math as Math$1, CircleGeometry, PlaneGeometry, MeshBasicMaterial, DoubleSide, Mesh } from 'three';
+import _, { get, sample } from 'lodash';
+import { PerspectiveCamera, WebGLRenderer, Group, Scene, TextureLoader, Vector3, Object3D, Math as Math$1, CircleGeometry, PlaneGeometry, MeshBasicMaterial, DoubleSide, Mesh } from 'three';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -83,11 +83,9 @@ function __generator(thisArg, body) {
 var Base = /** @class */ (function () {
     function Base(config) {
         this.$users = [];
-        this.avatarSize = 35;
         this.loaded = false;
-        var dom = config.dom, callback = config.callback, _a = config.backgroundType, backgroundType = _a === void 0 ? '2D' : _a, backgroundImage = config.backgroundImage, _b = config.shape, shape = _b === void 0 ? 'Round' : _b;
+        var dom = config.dom, callback = config.callback, _a = config.backgroundType, backgroundType = _a === void 0 ? '2D' : _a, backgroundImage = config.backgroundImage;
         this.dom = dom;
-        this.shape = shape;
         this.callback = callback;
         this.backgroundType = backgroundType;
         this.backgroundImage = backgroundImage;
@@ -119,22 +117,17 @@ var Base = /** @class */ (function () {
         }
     };
     Base.prototype.initRender = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (this.backgroundType === '3D') ;
-                else {
-                    this.dom.style.backgroundImage = "url(" + this.backgroundImage + ")";
-                }
-                this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
-                this.camera.position.z = 3000;
-                this.renderer = new WebGLRenderer({ alpha: true });
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.domElement.style.position = 'fixed';
-                this.renderer.domElement.style.left = '0px';
-                this.dom.appendChild(this.renderer.domElement);
-                return [2 /*return*/];
-            });
-        });
+        if (this.backgroundType === '3D') ;
+        else {
+            this.dom.style.backgroundImage = "url(" + this.backgroundImage + ")";
+        }
+        this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
+        this.camera.position.z = 3000;
+        this.renderer = new WebGLRenderer({ alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.domElement.style.position = 'fixed';
+        this.renderer.domElement.style.left = '0px';
+        this.dom.appendChild(this.renderer.domElement);
     };
     Base.clampToMaxSize = function (image, maxSize) {
         if (image.width > maxSize || image.height > maxSize) {
@@ -393,7 +386,6 @@ var Helix = /** @class */ (function () {
 var Sphere = /** @class */ (function () {
     function Sphere(options) {
         this.lon = 90;
-        this.lon = 90;
         this.group = options.group;
         this.camera = options.camera;
         var vector = new Vector3();
@@ -403,14 +395,9 @@ var Sphere = /** @class */ (function () {
             var theta = Math.sqrt(length * Math.PI) * phi;
             var object = new Object3D();
             var radius = 850;
-            if (options.counter > 100) {
-                radius = Math.sqrt(options.counter * 7230);
-                // this.scale = 850 / radius < 1 ? 850 / radius : 1
-            }
             object.position.x = radius * Math.cos(theta) * Math.sin(phi);
             object.position.y = radius * Math.sin(theta) * Math.sin(phi);
             object.position.z = radius * Math.cos(phi);
-            // console.log(object.scale)
             vector.copy(object.position).multiplyScalar(2);
             object.lookAt(vector);
             objs.push(object);
@@ -459,7 +446,7 @@ var Sphere = /** @class */ (function () {
      * @param speed
      */
     Sphere.prototype.rotation = function (speed) {
-        if (speed === void 0) { speed = 0.2; }
+        if (speed === void 0) { speed = 0.5; }
         var group = this.group;
         new TWEEN.Tween({ val: 0 })
             .onUpdate(function () {
@@ -475,7 +462,7 @@ var Sphere = /** @class */ (function () {
      */
     Sphere.prototype.cameraRotation = function (speed) {
         var _this = this;
-        if (speed === void 0) { speed = 0.5; }
+        if (speed === void 0) { speed = 0.2; }
         if (!this.lon) {
             this.lon = 90;
         }
@@ -522,9 +509,6 @@ var defaultShowOptions = [
 ];
 var Lottery3d = /** @class */ (function (_super) {
     __extends(Lottery3d, _super);
-    // private ready: boolean;
-    // private enableInit: boolean;
-    // private RotationSpeed: { x: number; y: number; z: number };
     function Lottery3d(config) {
         var _this = _super.call(this, config) || this;
         _this.counter = 100;
@@ -532,171 +516,12 @@ var Lottery3d = /** @class */ (function (_super) {
         _this.showOption = config.showOption || defaultShowOptions;
         return _this;
     }
-    Lottery3d.prototype.stop = function () {
-    };
-    // public start() {
-    //   return new Promise(async resolve => {
-    //     if (this.ready !== true) {
-    //       this.callback('not ready');
-    //       // reject('动画尚未准备就绪，请稍后')
-    //       return
-    //     }
-    //     let group = this.group
-    //     // let shineGroup = this.shineGroup
-    //
-    //     try {
-    //       await this.LotteryInit()
-    //       TWEEN.removeAll()
-    //     } catch (e) {
-    //       return
-    //     }
-    //
-    //     // this.scene2.add(group)
-    //
-    //     let max = 3000
-    //     this.RotationSpeed = {
-    //       x: _.random(0, max),
-    //       y: _.random(0, max),
-    //       z: _.random(0, max)
-    //     }
-    //
-    //     this.ready = false
-    //     this.callback('lottery starting')
-    //     // this.Vue.lotteryStatus = 'starting'
-    //
-    //     let Complete = async () => {
-    //       this.ready = false
-    //       // let objs = this.shineGroup.children
-    //
-    //       let users = []
-    //       this.callback('lottery awarding')
-    //       // this.Vue.lotteryStatus = 'awarding'
-    //       // this.Vue.showzjList = true
-    //
-    //       let that = this
-    //       let pushShowUser = function () {
-    //         for (let obj of objs) {
-    //           that.Vue.showOne(obj._uInfo)
-    //           users.push(obj._uInfo)
-    //         }
-    //       }
-    //
-    //       if (!!this.Vue.roundConfig.isPaichu) {
-    //         // 中奖排除时的动作
-    //         if (objs.length <= 20)
-    //         // 完成每个头像挨个移除的动效
-    //           await (() => {
-    //             return new Promise(async resolve => {
-    //               let f
-    //               for (let obj of objs) {
-    //                 await (() => {
-    //                   return new Promise(R => {
-    //                     setTimeout(() => {
-    //                       f = this.remove(obj).then(res => {
-    //                         this.Vue.showOne(obj._uInfo)
-    //                       })
-    //                       R()
-    //                     }, 200)
-    //                   })
-    //                 })()
-    //                 users.push(obj._uInfo)
-    //               }
-    //               // 最后一个remove结束之后执行
-    //               f.then(res => {
-    //                 resolve(res)
-    //               })
-    //             })
-    //           })()
-    //         else
-    //         // 数量超过20个直接删除消失
-    //           pushShowUser()
-    //
-    //         this.shineGroup.remove(...objs)
-    //       } else {
-    //         pushShowUser()
-    //         this.group.add(...objs)
-    //       }
-    //
-    //       this.lotteryAfter()
-    //
-    //       resolve(users)
-    //     }
-    //
-    //     new TWEEN.Tween()
-    //       .onUpdate(data => {
-    //         // 是否是停止阶段
-    //         // this.Vue.lotteryStatus === 'slowdown' && (
-    //         // this.slowDown()
-    //         // )
-    //
-    //         let speed = this.RotationSpeed
-    //         let isEmpty = true
-    //         for (let index in speed) {
-    //           let item = speed[index] * 0.0001
-    //           item = item > 0 ? item : 0
-    //           group.rotation[index] += item
-    //           // 判断当前速度是否还有效
-    //           item > 0 && (isEmpty = false)
-    //         }
-    //
-    //         // 恢复原来的状态
-    //         let shineChildren = shineGroup.children
-    //         shineChildren.length > 0 && group.add(...shineChildren)
-    //         shineGroup.remove(...shineChildren)
-    //         let paixuObj = this.getNearstObj(n)
-    //
-    //         shineGroup.add(...paixuObj)
-    //
-    //         // 判断是否速度都为0 结束游戏
-    //         if (isEmpty) {
-    //           TWEEN.removeAll()
-    //           Complete()
-    //         }
-    //       })
-    //       .repeat(Infinity)
-    //       .start()
-    //   })
-    // }
-    // private CaculatePosition(length) {
-    //   let Position = this.camera.position.clone()
-    //   return Position.setLength(length)
-    // }
-    // private LotteryInit() {
-    //   return new Promise(resolve => {
-    //     if (this.enableInit) {
-    //       this.callback('lotterying')
-    //       // reject('正在准备抽奖阶段')
-    //       return
-    //     }
-    //     this.enableInit = true
-    //     // let group = this.group
-    //     // group.add(this.shineGroup)
-    //     // this.GodRaysPass.renderPassMask = this.ShineGroupMask
-    //     // this.toneMappingPass.enabled = true
-    //
-    //     TWEEN.removeAll()
-    //
-    //     new TWEEN.Tween(this.camera.position)
-    //       .easing(TWEEN.Easing.Cubic.Out)
-    //       .to(this.CaculatePosition(3500), 500)
-    //       .onUpdate(() => {
-    //         this.camera.lookAt(this.group.position)
-    //       })
-    //       .onComplete(() => {
-    //         this.enableInit = false
-    //         resolve()
-    //       })
-    //       .start()
-    //   })
-    //
-    // }
     Lottery3d.prototype.transform = function (target, duration) {
         var _this = this;
         return new Promise(function (resolve) {
             try {
                 var targets = target.objs;
                 TWEEN.removeAll();
-                // this.ready = false;
                 target.scale && _this.group.scale.set(target.scale, target.scale, target.scale);
                 var objarr = _this.group.children;
                 for (var i = 0; i < objarr.length; i++) {
@@ -724,7 +549,6 @@ var Lottery3d = /** @class */ (function (_super) {
                 }
                 setTimeout(function () {
                     target.cameraRotation && target.cameraRotation();
-                    // this.ready = true;
                     resolve();
                 }, duration * 2);
             }
@@ -945,9 +769,11 @@ var Sign3D = /** @class */ (function (_super) {
     function Sign3D(config) {
         var _this = _super.call(this, config) || this;
         _this.objects = [];
+        _this.avatarSize = 35;
         _this.counter = 1000;
-        var _a = config.animateSpendTime, animateSpendTime = _a === void 0 ? 10 : _a, openAnimates = config.openAnimates;
+        var _a = config.animateSpendTime, animateSpendTime = _a === void 0 ? 10 : _a, openAnimates = config.openAnimates, _b = config.shape, shape = _b === void 0 ? 'Round' : _b;
         _this.openAnimates = openAnimates;
+        _this.shape = shape;
         _this.animateSpendTime = animateSpendTime;
         _this.addUser = _this.addUser.bind(_this);
         return _this;
@@ -1009,7 +835,7 @@ var Sign3D = /** @class */ (function (_super) {
                     case 1:
                         object = _a.sent();
                         this.scene.add(object);
-                        replaceIndex = random(0, this.nowAnimate.objs.length - 1);
+                        replaceIndex = _.random(0, this.nowAnimate.objs.length - 1);
                         replaceObj = this.objects[replaceIndex];
                         porperty = {};
                         length = 200;
@@ -1069,6 +895,11 @@ var Sign3D = /** @class */ (function (_super) {
             });
         });
     };
+    Sign3D.prototype.destroy = function () {
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+    };
     Sign3D.prototype.createMesh = function (user, position) {
         if (position === void 0) { position = false; }
         return __awaiter(this, void 0, void 0, function () {
@@ -1116,7 +947,7 @@ var Sign3D = /** @class */ (function (_super) {
                         _a.label = 1;
                     case 1:
                         if (!(i < this.counter)) return [3 /*break*/, 4];
-                        user = sample(this.$users);
+                        user = _.sample(this.$users);
                         return [4 /*yield*/, this.createMesh(user)];
                     case 2:
                         object = _a.sent();
@@ -1245,6 +1076,8 @@ var Sign3D = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
+                        this.group = new Group();
+                        this.scene = new Scene();
                         this.initRender();
                         options_1 = {
                             counter: this.counter,
@@ -1292,9 +1125,6 @@ var Sign3D = /** @class */ (function (_super) {
 var ImageManger = /** @class */ (function () {
     function ImageManger() {
     }
-    ImageManger.prototype.cache = function (url) {
-        return url;
-    };
     return ImageManger;
 }());
 
