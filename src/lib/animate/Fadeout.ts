@@ -4,7 +4,7 @@ import {IOption} from "../type";
 export default class Fadeout {
   public objs: any[];
 
-  constructor(options: IOption) {
+  public constructor(options: IOption) {
     const objs = [];
     for (let i = 0; i < options.counter; i += 1) {
       const object = new Object3D();

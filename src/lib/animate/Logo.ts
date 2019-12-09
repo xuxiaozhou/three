@@ -7,7 +7,7 @@ export default class Logo {
 
   public objs: any[];
 
-  constructor(options: IOption) {
+  public constructor(options: IOption) {
     const {tableData} = options;
     this.group = options.group;
     this.camera = options.camera;
@@ -27,7 +27,7 @@ export default class Logo {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     const {camera, group} = this;
     const Time = 3000;
 

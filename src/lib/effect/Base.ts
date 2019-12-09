@@ -1,31 +1,27 @@
-import {Group, Scene, PerspectiveCamera, WebGLRenderer, Texture, TextureLoader} from 'three'
+import {PerspectiveCamera, WebGLRenderer, Texture, TextureLoader, Group, Scene} from 'three'
 import {IConfig, IUser} from "../type";
 
 abstract class Base {
   protected dom: HTMLElement;
   protected callback: (status: string) => void;
   protected backgroundType: '2D' | '3D';
-  protected readonly shape: 'Circle' | 'Round';
   protected backgroundImage: string;
   protected $users: IUser[] = [];
-  protected avatarSize: number = 35;
-  protected renderer: WebGLRenderer;
-  protected camera: PerspectiveCamera;
-  protected group: Group;
-  protected scene: Scene;
-  protected animationFrame: number;
-
   private loaded: boolean = false;
 
+  protected camera: PerspectiveCamera;
+  protected renderer: WebGLRenderer;
   protected abstract counter;
+  protected group: Group;
+  protected scene: Scene;
+  protected abstract animationFrame;
 
   protected constructor(config: IConfig) {
-    const {dom, callback, backgroundType = '2D', backgroundImage, shape = 'Round'} = config;
+    const {dom, callback, backgroundType = '2D', backgroundImage} = config;
     this.dom = dom;
-    this.shape = shape;
     this.callback = callback;
     this.backgroundType = backgroundType;
-    this.backgroundImage = backgroundImage;
+    this.backgroundImage = backgroundImage
     this.group = new Group();
     this.scene = new Scene();
   }
@@ -52,14 +48,8 @@ abstract class Base {
     }
   }
 
-  protected async initRender() {
+  protected initRender() {
     if (this.backgroundType === '3D') {
-      // const texture = await this.getTexture(this.backgroundImage)
-      // const material = new MeshBasicMaterial({map: texture})
-      // const SkyBoxSize = 4000
-      // const skyBox = new Mesh(new SphereBufferGeometry(SkyBoxSize, 0, 0), material)
-      // skyBox.applyMatrix(new Matrix4().makeScale(1, 1, -1))
-      // this.scene.add(skyBox)
     } else {
       this.dom.style.backgroundImage = `url(${this.backgroundImage})`;
     }
@@ -110,6 +100,7 @@ abstract class Base {
   }
 
   protected abstract init();
+
 }
 
 export default Base

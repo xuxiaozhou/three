@@ -21,184 +21,18 @@ class Lottery3d extends Base {
   protected counter: number = 100;
   private turnSelectData: object = {};
   private readonly showOption: IShowOption[];
-  // private ready: boolean;
-  // private enableInit: boolean;
-  // private RotationSpeed: { x: number; y: number; z: number };
+  protected animationFrame: number;
 
   constructor(config: IConfig) {
     super(config);
     this.showOption = config.showOption || defaultShowOptions
   }
 
-  public stop() {
-
-  }
-
-  // public start() {
-  //   return new Promise(async resolve => {
-  //     if (this.ready !== true) {
-  //       this.callback('not ready');
-  //       // reject('动画尚未准备就绪，请稍后')
-  //       return
-  //     }
-  //     let group = this.group
-  //     // let shineGroup = this.shineGroup
-  //
-  //     try {
-  //       await this.LotteryInit()
-  //       TWEEN.removeAll()
-  //     } catch (e) {
-  //       return
-  //     }
-  //
-  //     // this.scene2.add(group)
-  //
-  //     let max = 3000
-  //     this.RotationSpeed = {
-  //       x: _.random(0, max),
-  //       y: _.random(0, max),
-  //       z: _.random(0, max)
-  //     }
-  //
-  //     this.ready = false
-  //     this.callback('lottery starting')
-  //     // this.Vue.lotteryStatus = 'starting'
-  //
-  //     let Complete = async () => {
-  //       this.ready = false
-  //       // let objs = this.shineGroup.children
-  //
-  //       let users = []
-  //       this.callback('lottery awarding')
-  //       // this.Vue.lotteryStatus = 'awarding'
-  //       // this.Vue.showzjList = true
-  //
-  //       let that = this
-  //       let pushShowUser = function () {
-  //         for (let obj of objs) {
-  //           that.Vue.showOne(obj._uInfo)
-  //           users.push(obj._uInfo)
-  //         }
-  //       }
-  //
-  //       if (!!this.Vue.roundConfig.isPaichu) {
-  //         // 中奖排除时的动作
-  //         if (objs.length <= 20)
-  //         // 完成每个头像挨个移除的动效
-  //           await (() => {
-  //             return new Promise(async resolve => {
-  //               let f
-  //               for (let obj of objs) {
-  //                 await (() => {
-  //                   return new Promise(R => {
-  //                     setTimeout(() => {
-  //                       f = this.remove(obj).then(res => {
-  //                         this.Vue.showOne(obj._uInfo)
-  //                       })
-  //                       R()
-  //                     }, 200)
-  //                   })
-  //                 })()
-  //                 users.push(obj._uInfo)
-  //               }
-  //               // 最后一个remove结束之后执行
-  //               f.then(res => {
-  //                 resolve(res)
-  //               })
-  //             })
-  //           })()
-  //         else
-  //         // 数量超过20个直接删除消失
-  //           pushShowUser()
-  //
-  //         this.shineGroup.remove(...objs)
-  //       } else {
-  //         pushShowUser()
-  //         this.group.add(...objs)
-  //       }
-  //
-  //       this.lotteryAfter()
-  //
-  //       resolve(users)
-  //     }
-  //
-  //     new TWEEN.Tween()
-  //       .onUpdate(data => {
-  //         // 是否是停止阶段
-  //         // this.Vue.lotteryStatus === 'slowdown' && (
-  //         // this.slowDown()
-  //         // )
-  //
-  //         let speed = this.RotationSpeed
-  //         let isEmpty = true
-  //         for (let index in speed) {
-  //           let item = speed[index] * 0.0001
-  //           item = item > 0 ? item : 0
-  //           group.rotation[index] += item
-  //           // 判断当前速度是否还有效
-  //           item > 0 && (isEmpty = false)
-  //         }
-  //
-  //         // 恢复原来的状态
-  //         let shineChildren = shineGroup.children
-  //         shineChildren.length > 0 && group.add(...shineChildren)
-  //         shineGroup.remove(...shineChildren)
-  //         let paixuObj = this.getNearstObj(n)
-  //
-  //         shineGroup.add(...paixuObj)
-  //
-  //         // 判断是否速度都为0 结束游戏
-  //         if (isEmpty) {
-  //           TWEEN.removeAll()
-  //           Complete()
-  //         }
-  //       })
-  //       .repeat(Infinity)
-  //       .start()
-  //   })
-  // }
-
-  // private CaculatePosition(length) {
-  //   let Position = this.camera.position.clone()
-  //   return Position.setLength(length)
-  // }
-
-  // private LotteryInit() {
-  //   return new Promise(resolve => {
-  //     if (this.enableInit) {
-  //       this.callback('lotterying')
-  //       // reject('正在准备抽奖阶段')
-  //       return
-  //     }
-  //     this.enableInit = true
-  //     // let group = this.group
-  //     // group.add(this.shineGroup)
-  //     // this.GodRaysPass.renderPassMask = this.ShineGroupMask
-  //     // this.toneMappingPass.enabled = true
-  //
-  //     TWEEN.removeAll()
-  //
-  //     new TWEEN.Tween(this.camera.position)
-  //       .easing(TWEEN.Easing.Cubic.Out)
-  //       .to(this.CaculatePosition(3500), 500)
-  //       .onUpdate(() => {
-  //         this.camera.lookAt(this.group.position)
-  //       })
-  //       .onComplete(() => {
-  //         this.enableInit = false
-  //         resolve()
-  //       })
-  //       .start()
-  //   })
-  //
-  // }
-
   private transform(target, duration) {
     return new Promise(resolve => {
       try {
         let targets = target.objs;
         TWEEN.removeAll();
-        // this.ready = false;
         target.scale && this.group.scale.set(target.scale, target.scale, target.scale);
 
         let objarr = this.group.children;
@@ -231,7 +65,6 @@ class Lottery3d extends Base {
 
         setTimeout(() => {
           target.cameraRotation && target.cameraRotation();
-          // this.ready = true;
           resolve()
         }, duration * 2)
       } catch (e) {

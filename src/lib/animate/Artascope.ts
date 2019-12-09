@@ -7,7 +7,7 @@ export default class Artascope {
   private camera: Camera;
   public objs: any[];
 
-  constructor(options: IOption) {
+  public constructor(options: IOption) {
     this.rotationSpeed = options.rotationSpeed;
     this.group = options.group;
     this.camera = options.camera;
@@ -34,7 +34,7 @@ export default class Artascope {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     const {rotationSpeed, group, camera} = this;
 
     new TWEEN.Tween(camera.position)

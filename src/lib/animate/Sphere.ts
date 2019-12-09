@@ -8,8 +8,7 @@ export default class Sphere {
   public objs: any[];
   private lon: number = 90;
 
-  constructor(options: IOption) {
-    this.lon = 90;
+  public constructor(options: IOption) {
     this.group = options.group;
     this.camera = options.camera;
 
@@ -21,15 +20,10 @@ export default class Sphere {
 
       const object = new Object3D();
 
-      let radius = 850;
-      if (options.counter > 100) {
-        radius = Math.sqrt(options.counter * 7230);
-        // this.scale = 850 / radius < 1 ? 850 / radius : 1
-      }
+      const radius = 850;
       object.position.x = radius * Math.cos(theta) * Math.sin(phi);
       object.position.y = radius * Math.sin(theta) * Math.sin(phi);
       object.position.z = radius * Math.cos(phi);
-      // console.log(object.scale)
 
       vector.copy(object.position).multiplyScalar(2);
 
@@ -39,7 +33,7 @@ export default class Sphere {
     this.objs = objs
   }
 
-  tween() {
+  public tween() {
     const Time = 5000;
     const rotationSpeed = 0.2; // 旋转速度
     const {camera, group} = this;
@@ -86,7 +80,7 @@ export default class Sphere {
    * 球体自转
    * @param speed
    */
-  rotation(speed = 0.2) {
+  public rotation(speed = 0.5) {
     const {group} = this;
 
     new TWEEN.Tween({val: 0})
@@ -103,7 +97,7 @@ export default class Sphere {
   /**
    * 摄像机旋转
    */
-  cameraRotation(speed: number = 0.5) {
+  public cameraRotation(speed: number = 0.2) {
     if (!this.lon) {
       this.lon = 90
     }
@@ -123,5 +117,4 @@ export default class Sphere {
       .repeat(Infinity)
       .start()
   }
-
 }

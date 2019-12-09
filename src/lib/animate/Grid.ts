@@ -8,7 +8,7 @@ export default class Grid {
 
   public objs: any[];
 
-  constructor(options: IOption) {
+  public constructor(options: IOption) {
     this.group = options.group;
     this.camera = options.camera;
 
@@ -26,7 +26,7 @@ export default class Grid {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     const Time = 5000;
     const {camera, group} = this;
 
