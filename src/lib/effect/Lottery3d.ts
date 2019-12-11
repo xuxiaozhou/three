@@ -1,9 +1,9 @@
 import TWEEN from '@tweenjs/tween.js'
-import {MeshText2D} from "three-text2d-2";
-import {get, sample} from 'lodash'
-import {IConfig, IPosition, IShowOption, ITurnInfo, IUser} from "../type";
+import { MeshText2D } from "three-text2d-2";
+import { get, sample } from 'lodash'
+import { IConfig, IPosition, IShowOption, ITurnInfo, IUser } from "../type";
 import Base from "./Base";
-import {Sphere} from '../animate';
+import { Sphere } from '../animate';
 
 const colors = ['#f06292', '#9575cd', '#ef5350', '#4fc3f7', '#4dd0e1', '#66bb6a', '#fbc02d', '#ff7043'];
 const defaultShowOptions: IShowOption[] = [
@@ -21,7 +21,6 @@ class Lottery3d extends Base {
   protected counter: number = 100;
   private turnSelectData: object = {};
   private readonly showOption: IShowOption[];
-  protected animationFrame: number;
 
   constructor(config: IConfig) {
     super(config);
@@ -120,7 +119,7 @@ class Lottery3d extends Base {
       return this.turnSelectData[user.openid]
     }
 
-    let {image, text} = Lottery3d.turnSelect(user, this.showOption);
+    let { image, text } = Lottery3d.turnSelect(user, this.showOption);
     if (text === '未公开昵称') {
       text = ''
     }
@@ -134,7 +133,7 @@ class Lottery3d extends Base {
       image = false
     }
 
-    const $return = {text, image};
+    const $return = { text, image };
     this.turnSelectData[user.openid] = $return;
     return $return
   }
@@ -212,6 +211,9 @@ class Lottery3d extends Base {
     } catch (e) {
       console.log(e)
     }
+  }
+
+  protected createPassRender() {
   }
 }
 

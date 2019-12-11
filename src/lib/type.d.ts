@@ -1,4 +1,4 @@
-import {Camera, Group} from "three";
+import { Camera, Group } from "three";
 
 export interface IShowOption {
   type: 'variate' | 'text',
@@ -14,7 +14,8 @@ export interface IConfig {
   openAnimates?: string[],
   animateSpendTime?: number,
   showOption?: IShowOption[],
-  // imageManager?:
+  tableData?: any[],
+  shineColor?: string,
 }
 
 export interface IOption {

@@ -8,13 +8,19 @@ import {
   MeshBasicMaterial,
   DoubleSide, Mesh,
   Math as TMath,
-  Vector3
+  Vector3,
+  PointsMaterial,
+  BufferGeometry,
+  BufferAttribute,
+  Points,
+  Color
 } from "three";
 import TWEEN from '@tweenjs/tween.js'
 import _ from 'lodash'
+import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../postprocessing.min'
 import Fadeout from "../animate/Fadeout";
 import * as animatesEffect from '../animate'
-import {IConfig, IUser, IOption, IPosition} from "../type";
+import { IConfig, IUser, IOption, IPosition } from "../type";
 import Base from "./Base";
 
 const TWEEN2 = new TWEEN.Group();
@@ -35,10 +41,15 @@ class Sign3D extends Base {
   protected animationFrame: number;
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
+  private tableData: any[];
+  private shineColor: string
+  private passRenderer: any;
 
   constructor(config: IConfig) {
     super(config);
-    const {animateSpendTime = 10, openAnimates, shape = 'Round'} = config;
+    this.shineColor = config.shineColor
+    this.tableData = config.tableData
+    const { animateSpendTime = 10, openAnimates, shape = 'Round' } = config;
     this.openAnimates = openAnimates;
     this.shape = shape;
     this.animateSpendTime = animateSpendTime;
@@ -55,7 +66,7 @@ class Sign3D extends Base {
     if (!this.scene) {
       return
     }
-    const {camera} = this;
+    const { camera } = this;
     const object = await this.createMesh(user);
     this.scene.add(object);
     const replaceIndex = _.random(0, this.nowAnimate.objs.length - 1);
@@ -120,21 +131,21 @@ class Sign3D extends Base {
     initPorperty();
 
     // 移动到摄像机前 并跟随摄像机
-    let moveTo = new TWEEN.Tween({value: 0}, TWEEN2)
-      .to({value: 100}, 1000)
+    let moveTo = new TWEEN.Tween({ value: 0 }, TWEEN2)
+      .to({ value: 100 }, 1000)
       .onUpdate((data) => {
         followCamera(data)
       })
       .easing(TWEEN.Easing.Exponential.InOut);
-    let wait = new TWEEN.Tween({value: 100}, TWEEN2)
+    let wait = new TWEEN.Tween({ value: 100 }, TWEEN2)
       .onStart(initPorperty)
-      .to({value: 100}, 1000)
+      .to({ value: 100 }, 1000)
       .onUpdate((data) => {
         followCamera(data)
       });
 
-    let showing = new TWEEN.Tween({value: 0}, TWEEN2)
-      .to({value: 100}, 3000)
+    let showing = new TWEEN.Tween({ value: 0 }, TWEEN2)
+      .to({ value: 100 }, 3000)
       .onStart(() => {
         let newPosition = this.group.worldToLocal(object.position);
         let cameraPosition = this.group.worldToLocal(new Vector3().copy(camera.position));
@@ -312,7 +323,8 @@ class Sign3D extends Base {
     this.animationFrame = requestAnimationFrame(this.render.bind(this));
     TWEEN.update();
     TWEEN2.update();
-    this.renderer.render(this.scene, this.camera)
+    this.passRenderer.render()
+    // this.renderer.render(this.scene, this.camera)
   }
 
   private onResize() {
@@ -324,15 +336,14 @@ class Sign3D extends Base {
 
   private async initThree() {
     try {
-      this.group = new Group();
-      this.scene = new Scene();
       this.initRender();
       const options: IOption = {
         counter: this.counter,
         group: this.group,
         camera: this.camera,
         rotationSpeed: 4,
-        shape: this.shape
+        shape: this.shape,
+        tableData: this.tableData
       };
       this.fadeout = new Fadeout(options);
       const animates: any[] = [];
@@ -353,6 +364,52 @@ class Sign3D extends Base {
     this.initThree().then(() => {
       this.render();
     })
+  }
+
+  protected createPassRender() {
+    const { renderer } = this
+    const sunMaterial = new PointsMaterial({
+      size: 0,
+      sizeAttenuation: true,
+      color: 0xffddaa,
+      alphaTest: 0,
+      transparent: true,
+      fog: false
+    })
+    const sunGeometry = new BufferGeometry()
+    sunGeometry.addAttribute('position', new BufferAttribute(new Float32Array(3), 3))
+    const sun = new Points(sunGeometry, sunMaterial)
+
+    // 超出摄像机部分不渲染
+    sun.frustumCulled = true
+    sun.position.set(0, 0, -100)
+    this.scene.add(sun)
+
+    const composer = new EffectComposer(renderer)
+    let renderPass = new RenderPass(this.scene, this.camera)
+    composer.addPass(renderPass)
+
+    renderPass = new GodRaysPass(this.group, this.camera, sun, {
+      resolutionScale: 0.8,
+      kernelSize: KernelSize.SMALL,
+      intensity: 0.4,
+      density: 0.86,
+      decay: 0.83,
+      weight: 0.4,
+      exposure: 0.6,
+      samples: 60,
+      clampMax: 1.0
+    })
+
+    // 设置 renderPassMask 照出的部分设置颜色
+    renderPass.renderPassMask = new RenderPass(renderPass.mainScene, renderPass.mainCamera, {
+      overrideMaterial: new MeshBasicMaterial({ color: this.shineColor }),
+      clearColor: new Color(0x000000)
+    })
+    // this.GodRaysPass = renderPass
+    composer.addPass(renderPass)
+    renderPass.renderToScreen = true
+    this.passRenderer = composer
   }
 }
 

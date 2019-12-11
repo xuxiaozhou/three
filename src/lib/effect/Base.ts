@@ -1,5 +1,5 @@
-import {PerspectiveCamera, WebGLRenderer, Texture, TextureLoader, Group, Scene} from 'three'
-import {IConfig, IUser} from "../type";
+import { PerspectiveCamera, WebGLRenderer, Texture, TextureLoader, Group, Scene } from 'three'
+import { IConfig, IUser } from "../type";
 
 abstract class Base {
   protected dom: HTMLElement;
@@ -12,12 +12,13 @@ abstract class Base {
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
   protected abstract counter;
+
+  protected animationFrame: number;
   protected group: Group;
   protected scene: Scene;
-  protected abstract animationFrame;
 
   protected constructor(config: IConfig) {
-    const {dom, callback, backgroundType = '2D', backgroundImage} = config;
+    const { dom, callback, backgroundType = '2D', backgroundImage } = config;
     this.dom = dom;
     this.callback = callback;
     this.backgroundType = backgroundType;
@@ -55,11 +56,12 @@ abstract class Base {
     }
     this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
     this.camera.position.z = 3000;
-    this.renderer = new WebGLRenderer({alpha: true});
+    this.renderer = new WebGLRenderer({ alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.domElement.style.position = 'fixed';
     this.renderer.domElement.style.left = '0px';
     this.dom.appendChild(this.renderer.domElement);
+    this.createPassRender()
   }
 
   protected static clampToMaxSize(image, maxSize: number) {
@@ -88,18 +90,20 @@ abstract class Base {
 
       // 第一种方式获取
       textTure = new TextureLoader().load(url, (texture) => {
-          textTure.image = Base.clampToMaxSize(texture.image, 128);
-          res(textTure)
-        }, () => {
-        }, () => {
-          console.log('图片【' + url + '】下载错误');
-          res(textTure)
-        }
+        textTure.image = Base.clampToMaxSize(texture.image, 128);
+        res(textTure)
+      }, () => {
+      }, () => {
+        console.log('图片【' + url + '】下载错误');
+        res(textTure)
+      }
       )
     })
   }
 
   protected abstract init();
+
+  protected abstract createPassRender();
 
 }
 
