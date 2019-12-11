@@ -17,7 +17,7 @@ import {
 } from "three";
 import TWEEN from '@tweenjs/tween.js'
 import _ from 'lodash'
-import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../postprocessing.min'
+import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../postprocessing'
 import Fadeout from "../animate/Fadeout";
 import * as animatesEffect from '../animate'
 import { IConfig, IUser, IOption, IPosition } from "../type";
@@ -44,6 +44,7 @@ class Sign3D extends Base {
   private tableData: any[];
   private shineColor: string
   private passRenderer: any;
+  private GodRaysPass: any;
 
   constructor(config: IConfig) {
     super(config);
@@ -293,6 +294,8 @@ class Sign3D extends Base {
           z: 3000
         }, spendTime)
         .onComplete(() => {
+          this.GodRaysPass.godRaysMaterial.uniforms.density.value = 0.83
+          this.GodRaysPass.intensity = 0.4
           resolve()
         })
         .easing(TWEEN.Easing.Exponential.InOut)
@@ -406,7 +409,7 @@ class Sign3D extends Base {
       overrideMaterial: new MeshBasicMaterial({ color: this.shineColor }),
       clearColor: new Color(0x000000)
     })
-    // this.GodRaysPass = renderPass
+    this.GodRaysPass = renderPass
     composer.addPass(renderPass)
     renderPass.renderToScreen = true
     this.passRenderer = composer

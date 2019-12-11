@@ -1,5 +1,5 @@
-import {Vector3, Object3D, Group, Camera} from 'three'
-import {IOption} from "../type";
+import { Vector3, Object3D, Group, Camera } from 'three'
+import { IOption } from "../type";
 
 export default class Helix {
   private readonly group: Group;
@@ -37,7 +37,7 @@ export default class Helix {
 
   public tween(TWEEN) {
     const Time = 5000;
-    const {camera, group, rotationSpeed} = this;
+    const { camera, group, rotationSpeed } = this;
 
     const rand = function () {
       //生成从minNum到maxNum的随机数
@@ -77,7 +77,7 @@ export default class Helix {
       .onUpdate(function () {
         group.rotation.y -= 0.001 * rotationSpeed
       })
-      .to({y: 2000}, Time * 10)
+      .to({ y: 2000 }, Time * 10)
       .yoyo(true)
       .repeat(Infinity)
       .delay(1000)

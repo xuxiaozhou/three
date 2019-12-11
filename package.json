@@ -1,10 +1,8 @@
 {
   "name": "hudong-three",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "dist/hudong-three.js",
-  "module": "dist/hudong-three.esm.js",
-  "browser": "dist/hudong-three.umd.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --open",
@@ -24,13 +22,15 @@
   "dependencies": {
     "@tweenjs/tween.js": "^17.1.0",
     "lodash": "^4.17.15",
-    "three": "^0.87.1",
-    "three-text2d-2": "^0.3.8"
+    "three": "^0.87.1"
   },
   "devDependencies": {
+    "@types/node": "^12.12.17",
     "copy-webpack-plugin": "^5.0.5",
     "html-webpack-plugin": "^3.2.0",
     "rollup": "^1.27.8",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript": "^1.0.1",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.3",

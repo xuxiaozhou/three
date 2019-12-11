@@ -3,7 +3,7 @@ import { IConfig, IUser } from "../type";
 
 abstract class Base {
   protected dom: HTMLElement;
-  protected callback: (status: string) => void;
+  protected callback: (status: string, ...args: any[]) => void;
   protected backgroundType: '2D' | '3D';
   protected backgroundImage: string;
   protected $users: IUser[] = [];
@@ -89,7 +89,7 @@ abstract class Base {
       let textTure;
 
       // 第一种方式获取
-      textTure = new TextureLoader().load(url, (texture) => {
+      textTure = new TextureLoader().load(url, texture => {
         textTure.image = Base.clampToMaxSize(texture.image, 128);
         res(textTure)
       }, () => {

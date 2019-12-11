@@ -5,10 +5,9 @@ const sign3d = window.sign3d = new Sign3D({
   dom: document.getElementById('webgl'),
   backgroundImage: 'http://img.eventist.cn/hudong/threeBg.jpg',
   backgroundType: '2D',
-  shape: 'Circle',
+  shape: 'Round',
   shineColor: '#FCECB7',
   openAnimates: ['Sphere', 'Logo', 'Artascope', 'Grid', 'Helix'],
-  // openAnimates: ['Sphere', 'Artascope', 'Grid', 'Helix', 'Logo'],
   callback: (status) => {
     console.log(status)
   },
