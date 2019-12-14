@@ -1,4 +1,15 @@
-import { PerspectiveCamera, WebGLRenderer, Texture, TextureLoader, Group, Scene } from 'three'
+import {
+  PerspectiveCamera,
+  WebGLRenderer,
+  Texture,
+  TextureLoader,
+  Group,
+  Scene,
+  MeshBasicMaterial,
+  Mesh,
+  SphereBufferGeometry,
+  Matrix4
+} from 'three'
 import { IConfig, IUser } from "../type";
 
 abstract class Base {
@@ -16,15 +27,19 @@ abstract class Base {
   protected animationFrame: number;
   protected group: Group;
   protected scene: Scene;
+  protected cache: (img: string) => string;
+  protected shape: 'Round' | 'Circle' = 'Round';
 
   protected constructor(config: IConfig) {
-    const { dom, callback, backgroundType = '2D', backgroundImage } = config;
+    const { shape = 'Round', cache, dom, callback, backgroundType = '2D', backgroundImage } = config;
     this.dom = dom;
     this.callback = callback;
     this.backgroundType = backgroundType;
     this.backgroundImage = backgroundImage
     this.group = new Group();
     this.scene = new Scene();
+    this.cache = cache || (imgUrl => imgUrl)
+    this.shape = shape
   }
 
   /**
@@ -49,8 +64,14 @@ abstract class Base {
     }
   }
 
-  protected initRender() {
+  protected async initRender() {
     if (this.backgroundType === '3D') {
+      const texture = await this.getTexture(this.backgroundImage)
+      const material = new MeshBasicMaterial({ map: texture })
+      const SkyBoxSize = 4000
+      const skyBox = new Mesh(new SphereBufferGeometry(SkyBoxSize, 0, 0), material)
+      skyBox.applyMatrix(new Matrix4().makeScale(1, 1, -1))
+      this.scene.add(skyBox)
     } else {
       this.dom.style.backgroundImage = `url(${this.backgroundImage})`;
     }
@@ -64,7 +85,7 @@ abstract class Base {
     this.createPassRender()
   }
 
-  protected static clampToMaxSize(image, maxSize: number) {
+  protected clampToMaxSize(image, maxSize?: number) {
     if (image.width > maxSize || image.height > maxSize) {
       const scale = maxSize / Math.max(image.width, image.height);
       // @ts-ignore
@@ -72,17 +93,24 @@ abstract class Base {
       canvas.width = Math.floor(image.width * scale);
       canvas.height = Math.floor(image.height * scale);
       const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.width);
+      if (this.shape === 'Circle') {
+        const pattern = context.createPattern(canvas, 'no-repeat')
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.arc(canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2, 0, 2 * Math.PI)
+        context.fillStyle = pattern
+        context.fill()
+      }
       return canvas
     }
 
     return image
   }
 
-  protected getTexture(url: string): Promise<Texture> {
+  protected getTexture(url: string, maxSize: false | number = false): Promise<Texture> {
     return new Promise(async (res) => {
       try {
-        // url = saveImage.cache(url)
+        url = this.cache(url);
       } catch (e) {
       }
 
@@ -90,7 +118,9 @@ abstract class Base {
 
       // 第一种方式获取
       textTure = new TextureLoader().load(url, texture => {
-        textTure.image = Base.clampToMaxSize(texture.image, 128);
+        if (maxSize !== false) {
+          textTure.image = this.clampToMaxSize(texture.image, maxSize);
+        }
         res(textTure)
       }, () => {
       }, () => {

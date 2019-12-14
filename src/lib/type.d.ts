@@ -16,6 +16,7 @@ export interface IConfig {
   showOption?: IShowOption[],
   tableData?: any[],
   shineColor?: string,
+  cache?: (img: string) => string
 }
 
 export interface IOption {

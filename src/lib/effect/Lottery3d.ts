@@ -373,7 +373,7 @@ class Lottery3d extends Base {
 
     try {
       if (image !== false) {
-        const texturn = await this.getTexture(image);
+        const texturn = await this.getTexture(image, 100);
         image = texturn.image
       }
     } catch (e) {
@@ -396,11 +396,13 @@ class Lottery3d extends Base {
         })
       } else {
         const output = await this.turnOutPut(user);
+        console.log(output)
         mesh = new MeshText2D(output.text.slice(0, 10), {
           canvas: output.image,
           font: '40px PingFang-SC',
           fillStyle: '#ffffff',
-          antialias: true
+          antialias: true,
+          bgColor: '#f06292'
         })
         mesh._uInfo = user
       }
@@ -446,7 +448,7 @@ class Lottery3d extends Base {
 
   protected async init() {
     try {
-      this.initRender();
+      await this.initRender();
       await this.createMeshs();
       this.scene.add(this.group);
       this.transform(new Sphere({

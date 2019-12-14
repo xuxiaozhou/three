@@ -26,22 +26,6 @@ export default [
         }
       }),
       nodeResolve(),
-      typescript() // so Rollup can convert TypeScript to JavaScript
-    ]
-  },
-  {
-    input: 'src/lib/ImageManager/index.ts',
-    external: ['store', 'fs-extra', 'path', 'electron', 'request'],
-    output: [
-      {
-        file: 'dist/imageManager.js',
-        format: 'umd',
-        name: 'imageManage'
-      }
-    ],
-    plugins: [
-      nodeResolve(),
-      commonjs(),
       typescript()
     ]
   }

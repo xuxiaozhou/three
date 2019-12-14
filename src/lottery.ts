@@ -6,6 +6,7 @@ const lottery3d = window.lottery3d = new Lottery3d({
   backgroundType: '2D',
   dom: document.getElementById('webgl'),
   animateSpendTime: 10,
+  shape: 'Circle',
   callback: (status, ...args) => {
     console.log(status, args)
   }
@@ -36,10 +37,5 @@ lottery3d.users = [
     openid: 55,
     avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
     name: '答4案'
-  },
-  {
-    openid: 66,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答5案'
   },
 ];

@@ -30,7 +30,6 @@ class Sign3D extends Base {
   private avatarSize: number = 35;
   private fadeout: Fadeout;
   private readonly openAnimates: string[];
-  private readonly shape: 'Circle' | 'Round';
   private lodashAnimates: any;
   private readonly animateSpendTime: number;
   private nowAnimate: any;
@@ -50,9 +49,8 @@ class Sign3D extends Base {
     super(config);
     this.shineColor = config.shineColor
     this.tableData = config.tableData
-    const { animateSpendTime = 10, openAnimates, shape = 'Round' } = config;
+    const { animateSpendTime = 10, openAnimates } = config;
     this.openAnimates = openAnimates;
-    this.shape = shape;
     this.animateSpendTime = animateSpendTime;
     this.addUser = this.addUser.bind(this);
   }
@@ -339,7 +337,7 @@ class Sign3D extends Base {
 
   private async initThree() {
     try {
-      this.initRender();
+      await this.initRender();
       const options: IOption = {
         counter: this.counter,
         group: this.group,
