@@ -22,10 +22,10 @@ export default class Sphere {
       const object = new Object3D();
 
       let radius = 850;
-      if (options.counter > 100) {
-        radius = Math.sqrt(options.counter * 7230)
-        this.scale = 850 / radius < 1 ? 850 / radius : 1
-      }
+      // if (options.counter > 100) {
+      // radius = Math.sqrt(options.counter * 7230)
+      // this.scale = 850 / radius < 1 ? 850 / radius : 1
+      // }
       object.position.x = radius * Math.cos(theta) * Math.sin(phi);
       object.position.y = radius * Math.sin(theta) * Math.sin(phi);
       object.position.z = radius * Math.cos(phi);

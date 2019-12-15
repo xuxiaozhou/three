@@ -61,10 +61,11 @@ class Lottery3d extends Base {
     this.fillStyle = config.filleStyle || '#fff'
     this.bgColor = config.bgColor
     this.fontSize = config.fontSize || '30px'
+    this.render = this.render.bind(this)
   }
 
   private CaculatePosition(length) {
-    let Position = this.camera.position.clone()
+    const Position = this.camera.position.clone()
     return Position.setLength(length)
   }
 
@@ -411,7 +412,7 @@ class Lottery3d extends Base {
   }
 
   private render() {
-    this.animationFrame = requestAnimationFrame(this.render.bind(this));
+    this.animationFrame = requestAnimationFrame(this.render);
     TWEEN.update();
     this.passRender()
   }
