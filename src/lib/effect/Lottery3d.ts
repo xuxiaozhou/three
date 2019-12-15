@@ -35,62 +35,37 @@ import { Sphere } from '../animate';
 import { defaultShowOptions } from '../utils/constant'
 
 class Lottery3d extends Base {
-  protected counter: number = 100;
+  protected minCount: number = 100;
   private turnSelectData: object = {};
   private readonly showOption: IShowOption[];
-  scene2: Scene;
-  GroupMask: Group
-  shineGroup: Group
-  ShineGroupMask: any
-  GodRaysPass: any
-  toneMappingPass: any
-  Clock: Clock
-  passRenderer: any
-  ready: boolean
-  enableInit: boolean
-  RotationSpeed: { x: number, y: number, z: number }
+  private scene2: Scene;
+  private GroupMask: Group
+  private shineGroup: Group
+  private ShineGroupMask: any
+  private GodRaysPass: any
+  private toneMappingPass: any
+  private Clock: Clock
+  private passRenderer: any
+  private ready: boolean
+  private enableInit: boolean
+  private RotationSpeed: { x: number, y: number, z: number }
+  private fillStyle: string
+  private bgColor: string
+  private fontSize: string
 
   public constructor(config: IConfig) {
     super(config);
     this.showOption = config.showOption || defaultShowOptions
+    this.shape = 'Circle'
+    this.minCount = config.minCount || 100
+    this.fillStyle = config.filleStyle || '#fff'
+    this.bgColor = config.bgColor
+    this.fontSize = config.fontSize || '30px'
   }
 
   private CaculatePosition(length) {
     let Position = this.camera.position.clone()
     return Position.setLength(length)
-  }
-
-  /**
-   * 开始进入抽奖阶段
-   */
-  private LotteryInit() {
-    return new Promise((resolve, reject) => {
-      if (this.enableInit) {
-        reject('正在准备抽奖阶段')
-        return
-      }
-      this.enableInit = true
-      let group = this.group
-      group.add(this.shineGroup)
-      this.GodRaysPass.renderPassMask = this.ShineGroupMask
-
-      this.toneMappingPass.enabled = true
-
-      TWEEN.removeAll()
-
-      new TWEEN.Tween(this.camera.position)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .to(this.CaculatePosition(3500), 500)
-        .onUpdate(() => {
-          this.camera.lookAt(group.position)
-        })
-        .onComplete(() => {
-          this.enableInit = false
-          resolve()
-        })
-        .start()
-    })
-
   }
 
   public stop() {
@@ -107,9 +82,9 @@ class Lottery3d extends Base {
   }
 
   public start(count: number) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       if (this.ready !== true) {
-        reject('动画尚未准备就绪，请稍后')
+        this.callback('lottery not ready')
         return
       }
       const { group, shineGroup } = this
@@ -137,51 +112,14 @@ class Lottery3d extends Base {
 
         let users = []
         this.callback('lottery awarding')
-        // this.Vue.lotteryStatus = 'awarding'
-        // this.Vue.showzjList = true
 
         let pushShowUser = () => {
           for (let obj of objs) {
             this.callback('showOne', obj._uInfo)
-            // that.Vue.showOne(obj._uInfo)
             users.push(obj._uInfo)
           }
         }
 
-        // if (!!this.Vue.roundConfig.isPaichu) {
-        //   // 中奖排除时的动作
-        //   if (objs.length <= 20)
-        //     // 完成每个头像挨个移除的动效
-        //     await (() => {
-        //       return new Promise(async resolve => {
-        //         let f
-        //         for (let obj of objs) {
-        //           await (() => {
-        //             return new Promise(R => {
-        //               setTimeout(() => {
-        //                 f = this.remove(obj).then(res => {
-        //                   this.Vue.showOne(obj._uInfo)
-        //                 })
-        //                 R()
-        //               }, 200)
-        //             })
-        //           })()
-        //           users.push(obj._uInfo)
-        //         }
-        //         // 最后一个remove结束之后执行
-        //         f.then(res => {
-        //           resolve(res)
-        //         })
-        //       })
-        //     })()
-        //   else
-        //     // 数量超过20个直接删除消失
-        //     pushShowUser()
-
-        //   this.shineGroup.remove(...objs)
-        // } else {
-
-        // }
         pushShowUser()
         this.group.add(...objs)
 
@@ -224,6 +162,39 @@ class Lottery3d extends Base {
   }
 
   /**
+   * 开始进入抽奖阶段
+   */
+  private LotteryInit() {
+    return new Promise(resolve => {
+      if (this.enableInit) {
+        this.callback('lottery prepare')
+        return
+      }
+      this.enableInit = true
+      let group = this.group
+      group.add(this.shineGroup)
+      this.GodRaysPass.renderPassMask = this.ShineGroupMask
+
+      this.toneMappingPass.enabled = true
+
+      TWEEN.removeAll()
+
+      new TWEEN.Tween(this.camera.position)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .to(this.CaculatePosition(3500), 500)
+        .onUpdate(() => {
+          this.camera.lookAt(group.position)
+        })
+        .onComplete(() => {
+          this.enableInit = false
+          resolve()
+        })
+        .start()
+    })
+
+  }
+
+  /**
   * 抽奖动画结束后的处理
   */
   private async lotteryAfter() {
@@ -244,7 +215,7 @@ class Lottery3d extends Base {
     this.toneMappingPass.enabled = false
     this.group.remove(this.shineGroup)
     this.transform(new Sphere({
-      counter: this.counter,
+      counter: this.group.children.length,
       group: this.group,
       camera: this.camera
     }), 2000);
@@ -396,13 +367,16 @@ class Lottery3d extends Base {
         })
       } else {
         const output = await this.turnOutPut(user);
-        console.log(output)
+        const config: { bgColor?: string } = {}
+        if (this.bgColor) {
+          config.bgColor = this.bgColor
+        }
         mesh = new MeshText2D(output.text.slice(0, 10), {
           canvas: output.image,
-          font: '40px PingFang-SC',
-          fillStyle: '#ffffff',
+          font: this.fontSize + ' PingFang-SC',
+          fillStyle: this.fillStyle,
           antialias: true,
-          bgColor: '#f06292'
+          ...config
         })
         mesh._uInfo = user
       }
@@ -424,7 +398,7 @@ class Lottery3d extends Base {
   }
 
   private async createMeshs() {
-    const num = this.$users.length < this.counter ? this.counter : this.$users.length;
+    const num = this.$users.length < this.minCount ? this.minCount : this.$users.length;
     for (let i = 0; i < num; i++) {
       const user = this.$users[i] || false;
       const object = await this.createMesh(user);
@@ -432,18 +406,21 @@ class Lottery3d extends Base {
     }
   }
 
+  private passRender() {
+    this.passRenderer.render(this.Clock.getDelta());
+  }
+
   private render() {
     this.animationFrame = requestAnimationFrame(this.render.bind(this));
     TWEEN.update();
-    this.passRenderer.render();
-    // this.renderer.render(this.scene, this.camera)
+    this.passRender()
   }
 
   private onResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.render(this.scene, this.camera);
+    this.passRender()
   }
 
   protected async init() {
@@ -452,7 +429,7 @@ class Lottery3d extends Base {
       await this.createMeshs();
       this.scene.add(this.group);
       this.transform(new Sphere({
-        counter: this.counter,
+        counter: this.group.children.length,
         group: this.group,
         camera: this.camera
       }), 2000);
@@ -485,16 +462,9 @@ class Lottery3d extends Base {
     this.scene.add(sun)
     this.scene.add(this.group)
 
-    const composer = new EffectComposer(renderer, {
-      stencilBuffer: true,
-    })
-
+    const composer = new EffectComposer(renderer, { stencilBuffer: true, })
     const clearMaskPass = new ClearMaskPass()
-
-    // let renderBg = new RenderPass(this.sceneBg, this.camera)
-
     const renderPass = new RenderPass(this.scene, this.camera)
-
     const renderPass2 = new RenderPass(this.scene2, this.camera)
     renderPass2.clear = false
 
@@ -506,13 +476,12 @@ class Lottery3d extends Base {
       resolution: 1,
       distinction: 1
     })
-    // toneMappingPass.defines.ADAPTED_LUMINANCE = 1
     toneMappingPass.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3
     toneMappingPass.toneMappingMaterial.uniforms.maxLuminance.value = 3
     toneMappingPass.toneMappingMaterial.uniforms.middleGrey.value = .8
     this.toneMappingPass = toneMappingPass
 
-    let toneMappingPass2 = new ToneMappingPass({
+    const toneMappingPass2 = new ToneMappingPass({
       adaptive: false,
       resolution: 1,
       distinction: 100
@@ -520,9 +489,6 @@ class Lottery3d extends Base {
     toneMappingPass2.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3
     toneMappingPass2.toneMappingMaterial.uniforms.maxLuminance.value = 3
     toneMappingPass2.toneMappingMaterial.uniforms.middleGrey.value = 80
-
-    // maskPass.scene = this.group
-    // toneMappingPass.renderToScreen = true
 
     const GodPass = new GodRaysPass(this.group, this.camera, sun, {
       resolutionScale: 0.8,
@@ -544,12 +510,10 @@ class Lottery3d extends Base {
     this.shineGroup = new Group()
 
     this.ShineGroupMask = new RenderPass(this.shineGroup, GodPass.mainCamera, {
-      // overrideMaterial: new MeshBasicMaterial({color: this.roundConfig.shineColor}),
       clearColor: new Color(0x000000)
     })
 
     GodPass.renderPassMask = this.GroupMask
-    // GodPass.renderToScreen = true
     this.GodRaysPass = GodPass
 
     // composer.addPass(renderBg)

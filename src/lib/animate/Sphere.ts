@@ -1,12 +1,13 @@
 import TWEEN from '@tweenjs/tween.js'
-import {Vector3, Object3D, Camera, Group, Math as tMath} from 'three'
-import {IOption} from "../type";
+import { Vector3, Object3D, Camera, Group, Math as tMath } from 'three'
+import { IOption } from "../type";
 
 export default class Sphere {
   private readonly camera: Camera;
   private readonly group: Group;
   public objs: any[];
   private lon: number = 90;
+  scale: number = 1;
 
   public constructor(options: IOption) {
     this.group = options.group;
@@ -20,7 +21,11 @@ export default class Sphere {
 
       const object = new Object3D();
 
-      const radius = 850;
+      let radius = 850;
+      if (options.counter > 100) {
+        radius = Math.sqrt(options.counter * 7230)
+        this.scale = 850 / radius < 1 ? 850 / radius : 1
+      }
       object.position.x = radius * Math.cos(theta) * Math.sin(phi);
       object.position.y = radius * Math.sin(theta) * Math.sin(phi);
       object.position.z = radius * Math.cos(phi);
@@ -36,7 +41,7 @@ export default class Sphere {
   public tween() {
     const Time = 5000;
     const rotationSpeed = 0.2; // 旋转速度
-    const {camera, group} = this;
+    const { camera, group } = this;
 
     const rand = function () {
       //生成从minNum到maxNum的随机数
@@ -81,13 +86,13 @@ export default class Sphere {
    * @param speed
    */
   public rotation(speed = 0.5) {
-    const {group} = this;
+    const { group } = this;
 
-    new TWEEN.Tween({val: 0})
+    new TWEEN.Tween({ val: 0 })
       .onUpdate(function () {
         group.rotation.y += 0.001 * speed
       })
-      .to({val: 100}, 5000)
+      .to({ val: 100 }, 5000)
       .yoyo(true)
       .repeat(Infinity)
       .start()
@@ -104,7 +109,7 @@ export default class Sphere {
     let camera = this.camera;
     let length = camera.position.length();
     let group = this.group;
-    new TWEEN.Tween({val: 0})
+    new TWEEN.Tween({ val: 0 })
       .onUpdate(() => {
         this.lon += 0.1 * speed;
         let theta = tMath.degToRad(this.lon);
@@ -112,7 +117,7 @@ export default class Sphere {
         camera.position.z = length * Math.sin(theta);
         camera.lookAt(group.position)
       })
-      .to({val: 100}, 5000)
+      .to({ val: 100 }, 5000)
       .yoyo(true)
       .repeat(Infinity)
       .start()

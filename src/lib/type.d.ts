@@ -16,7 +16,11 @@ export interface IConfig {
   showOption?: IShowOption[],
   tableData?: any[],
   shineColor?: string,
-  cache?: (img: string) => string
+  cache?: (img: string) => string,
+  minCount?: number,
+  filleStyle?: string,
+  bgColor?: string | undefined,
+  fontSize?: string
 }
 
 export interface IOption {

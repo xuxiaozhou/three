@@ -49,7 +49,7 @@ class Sign3D extends Base {
     super(config);
     this.shineColor = config.shineColor
     this.tableData = config.tableData
-    const { animateSpendTime = 10, openAnimates } = config;
+    const { animateSpendTime = 15, openAnimates } = config;
     this.openAnimates = openAnimates;
     this.animateSpendTime = animateSpendTime;
     this.addUser = this.addUser.bind(this);
@@ -180,7 +180,7 @@ class Sign3D extends Base {
   }
 
   private async createMesh(user: IUser, position: false | IPosition = false) {
-    const map = await this.getTexture(user.avatar);
+    const map = await this.getTexture(user.avatar, 128);
     let Plane;
     if (this.shape == 'Circle') {
       const radius = this.avatarSize / 2;
@@ -202,9 +202,9 @@ class Sign3D extends Base {
       mesh.position.z = Math.random() * 4000 - 2000;
       return mesh
     }
-    mesh.position.x = (position as IPosition).x;
-    mesh.position.y = (position as IPosition).y;
-    mesh.position.z = (position as IPosition).z;
+    mesh.position.x = position.x;
+    mesh.position.y = position.y;
+    mesh.position.z = position.z;
     return mesh
   }
 

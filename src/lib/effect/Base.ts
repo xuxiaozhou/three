@@ -22,7 +22,6 @@ abstract class Base {
 
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
-  protected abstract counter;
 
   protected animationFrame: number;
   protected group: Group;
@@ -50,8 +49,9 @@ abstract class Base {
     this.$users = users;
     if (!this.loaded && users.length !== 0) {
       this.callback('loading');
-      this.init();
-      this.loaded = true;
+      this.init().then(() => {
+        this.loaded = true;
+      });
     }
     if (users.length === 0) {
       this.callback('not user');
@@ -65,24 +65,28 @@ abstract class Base {
   }
 
   protected async initRender() {
-    if (this.backgroundType === '3D') {
-      const texture = await this.getTexture(this.backgroundImage)
-      const material = new MeshBasicMaterial({ map: texture })
-      const SkyBoxSize = 4000
-      const skyBox = new Mesh(new SphereBufferGeometry(SkyBoxSize, 0, 0), material)
-      skyBox.applyMatrix(new Matrix4().makeScale(1, 1, -1))
-      this.scene.add(skyBox)
-    } else {
-      this.dom.style.backgroundImage = `url(${this.backgroundImage})`;
+    try {
+      if (this.backgroundType === '3D') {
+        const texture = await this.getTexture(this.backgroundImage)
+        const material = new MeshBasicMaterial({ map: texture })
+        const SkyBoxSize = 4000
+        const skyBox = new Mesh(new SphereBufferGeometry(SkyBoxSize, 0, 0), material)
+        skyBox.applyMatrix(new Matrix4().makeScale(1, 1, -1))
+        this.scene.add(skyBox)
+      } else {
+        this.dom.style.backgroundImage = `url(${this.backgroundImage})`;
+      }
+      this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
+      this.camera.position.z = 3000;
+      this.renderer = new WebGLRenderer({ alpha: true });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.domElement.style.position = 'fixed';
+      this.renderer.domElement.style.left = '0px';
+      this.dom.appendChild(this.renderer.domElement);
+      this.createPassRender()
+    } catch (e) {
+      this.callback('not support')
     }
-    this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
-    this.camera.position.z = 3000;
-    this.renderer = new WebGLRenderer({ alpha: true });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.domElement.style.position = 'fixed';
-    this.renderer.domElement.style.left = '0px';
-    this.dom.appendChild(this.renderer.domElement);
-    this.createPassRender()
   }
 
   protected clampToMaxSize(image, maxSize?: number) {

@@ -11,31 +11,12 @@ const lottery3d = window.lottery3d = new Lottery3d({
     console.log(status, args)
   }
 });
-
-lottery3d.users = [
-  {
-    openid: 11,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答案'
-  },
-  {
-    openid: 22,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答1案'
-  },
-  {
-    openid: 33,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答2案'
-  },
-  {
-    openid: 44,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答3案'
-  },
-  {
-    openid: 55,
-    avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132',
-    name: '答4案'
-  },
-];
+const users = []
+Array.from(new Array(50)).forEach((_, i) => {
+  users.push({
+    openid: i,
+    avatar: i % 2 === 0 ? 'http://thirdwx.qlogo.cn/mmopen/vi_32/JqfbL9Z2prhybabOMfPUELUQAichrtTLCWFCUr6hTicMCE77qwSPsHm7wRNpzPY2kdG3RrlLco6shVAiatGtsIDgw/132' : 'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2187162754,2147384057&fm=15&gp=0.jpg',
+    name: '答案' + i
+  })
+})
+lottery3d.users = users
