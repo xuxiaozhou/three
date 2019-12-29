@@ -173,12 +173,6 @@ class Sign3D extends Base {
     moveTo.start()
   }
 
-  public destroy() {
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame)
-    }
-  }
-
   private async createMesh(user: IUser, position: false | IPosition = false) {
     const map = await this.getTexture(user.avatar, 128);
     let Plane;
@@ -321,11 +315,12 @@ class Sign3D extends Base {
   }
 
   private render() {
-    this.animationFrame = requestAnimationFrame(this.render.bind(this));
-    TWEEN.update();
-    TWEEN2.update();
-    this.passRenderer.render()
-    // this.renderer.render(this.scene, this.camera)
+    if (this.loaded) {
+      this.animationFrame = requestAnimationFrame(this.render.bind(this));
+      TWEEN.update();
+      TWEEN2.update();
+      this.passRenderer.render()
+    }
   }
 
   private onResize() {

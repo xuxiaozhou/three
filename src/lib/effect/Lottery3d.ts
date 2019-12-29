@@ -412,9 +412,11 @@ class Lottery3d extends Base {
   }
 
   private render() {
-    this.animationFrame = requestAnimationFrame(this.render);
-    TWEEN.update();
-    this.passRender()
+    if (this.loaded) {
+      this.animationFrame = requestAnimationFrame(this.render);
+      TWEEN.update();
+      this.passRender()
+    }
   }
 
   private onResize() {

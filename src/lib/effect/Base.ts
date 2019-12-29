@@ -18,7 +18,7 @@ abstract class Base {
   protected backgroundType: '2D' | '3D';
   protected backgroundImage: string;
   protected $users: IUser[] = [];
-  private loaded: boolean = false;
+  public loaded: boolean = false;
 
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
@@ -86,6 +86,7 @@ abstract class Base {
       this.createPassRender()
     } catch (e) {
       this.callback('not support')
+      throw new Error('not support')
     }
   }
 
