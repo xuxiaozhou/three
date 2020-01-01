@@ -28,6 +28,7 @@ abstract class Base {
   protected scene: Scene;
   protected cache: (img: string) => string;
   protected shape: 'Round' | 'Circle' = 'Round';
+  protected abstract passRenderer;
 
   protected constructor(config: IConfig) {
     const { shape = 'Round', cache, dom, callback, backgroundType = '2D', backgroundImage } = config;
@@ -62,6 +63,12 @@ abstract class Base {
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame)
     }
+    this.renderer = null
+    this.passRenderer = null
+    if (this.dom) {
+      this.dom.innerHTML = ''
+      this.dom.style.backgroundImage = ''
+    }
   }
 
   protected async initRender() {
@@ -85,6 +92,7 @@ abstract class Base {
       this.dom.appendChild(this.renderer.domElement);
       this.createPassRender()
     } catch (e) {
+      console.log(e)
       this.callback('not support')
       throw new Error('not support')
     }

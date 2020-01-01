@@ -45,7 +45,7 @@ class Lottery3d extends Base {
   private GodRaysPass: any
   private toneMappingPass: any
   private Clock: Clock
-  private passRenderer: any
+  protected passRenderer: any
   private ready: boolean
   private enableInit: boolean
   private RotationSpeed: { x: number, y: number, z: number }
@@ -67,6 +67,12 @@ class Lottery3d extends Base {
   private CaculatePosition(length) {
     const Position = this.camera.position.clone()
     return Position.setLength(length)
+  }
+
+  public destroy() {
+    super.destroy()
+    window.removeEventListener('resize', this.onResize.bind(this), false)
+
   }
 
   public stop() {
@@ -420,7 +426,9 @@ class Lottery3d extends Base {
   private onResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.renderer) {
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
     this.passRender()
   }
 

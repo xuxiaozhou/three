@@ -30,7 +30,6 @@ class Sign3D extends Base {
   private avatarSize: number = 35;
   private fadeout: Fadeout;
   private readonly openAnimates: string[];
-  private lodashAnimates: any;
   private readonly animateSpendTime: number;
   private nowAnimate: any;
 
@@ -42,17 +41,30 @@ class Sign3D extends Base {
   protected renderer: WebGLRenderer;
   private tableData: any[];
   private shineColor: string
-  private passRenderer: any;
+  protected passRenderer: any;
   private GodRaysPass: any;
+  protected lodashAnimates: any;
+  private timer = null
+  private remove: boolean = false;
 
   constructor(config: IConfig) {
     super(config);
+    this.remove = false
     this.shineColor = config.shineColor
     this.tableData = config.tableData
     const { animateSpendTime = 15, openAnimates } = config;
     this.openAnimates = openAnimates;
     this.animateSpendTime = animateSpendTime;
     this.addUser = this.addUser.bind(this);
+  }
+
+  public destroy() {
+    super.destroy()
+    this.remove = true
+    this.lodashAnimates = null
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
   }
 
   /**
@@ -296,6 +308,9 @@ class Sign3D extends Base {
   }
 
   private loopAnimate() {
+    if (this.remove) {
+      return
+    }
     let animate = this.lodashAnimates.next().value;
     if (!animate) {
       this.lodashAnimates.__index__ = 0;
@@ -309,7 +324,7 @@ class Sign3D extends Base {
       this.transform(animate, 3000)
     });
 
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.loopAnimate()
     }, (parseInt(String(this.animateSpendTime)) + 5) * 1000)
   }
@@ -319,7 +334,9 @@ class Sign3D extends Base {
       this.animationFrame = requestAnimationFrame(this.render.bind(this));
       TWEEN.update();
       TWEEN2.update();
-      this.passRenderer.render()
+      if (this.passRenderer) {
+        this.passRenderer.render()
+      }
     }
   }
 
