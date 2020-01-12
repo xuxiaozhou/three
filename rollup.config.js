@@ -28,5 +28,16 @@ export default [
       nodeResolve(),
       typescript()
     ]
+  },
+  {
+    input: 'src/lib/ws.ts',
+    output: [
+      { file: 'dist/ws.js', format: 'cjs' }
+    ],
+    plugins: [
+      commonjs(),
+      nodeResolve(),
+      typescript()
+    ]
   }
 ]
