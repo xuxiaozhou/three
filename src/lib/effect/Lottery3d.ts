@@ -27,7 +27,7 @@ import {
   ShaderPass,
   CopyMaterial,
   ClearMaskPass
-} from '../postprocessing'
+} from '../utils/postprocessing'
 import MeshText2D from '../MeshText2D/MeshText2D'
 import { IConfig, IPosition, IShowOption, ITurnInfo, IUser } from "../type";
 import Base from "./Base";
@@ -52,9 +52,11 @@ class Lottery3d extends Base {
   private fillStyle: string
   private bgColor: string
   private fontSize: string
+  private remove: boolean
 
   public constructor(config: IConfig) {
     super(config);
+    this.remove = false
     this.showOption = config.showOption || defaultShowOptions
     this.shape = 'Circle'
     this.minCount = config.minCount || 100
@@ -71,8 +73,8 @@ class Lottery3d extends Base {
 
   public destroy() {
     super.destroy()
+    this.remove = true
     window.removeEventListener('resize', this.onResize.bind(this), false)
-
   }
 
   public stop() {
@@ -418,9 +420,11 @@ class Lottery3d extends Base {
   }
 
   private render() {
-    this.animationFrame = requestAnimationFrame(this.render);
-    TWEEN.update();
-    this.passRender()
+    if (!this.remove) {
+      this.animationFrame = requestAnimationFrame(this.render);
+      TWEEN.update();
+      this.passRender()
+    }
   }
 
   private onResize() {

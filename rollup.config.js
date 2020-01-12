@@ -13,7 +13,7 @@ export default [
     plugins: [
       commonjs({
         namedExports: {
-          './src/lib/postprocessing': [
+          './src/lib/utils/postprocessing': [
             'EffectComposer', 'RenderPass',
             'GodRaysPass', 'KernelSize',
             'ClearMaskPass',

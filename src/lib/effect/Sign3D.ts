@@ -17,7 +17,7 @@ import {
 } from "three";
 import TWEEN from '@tweenjs/tween.js'
 import _ from 'lodash'
-import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../postprocessing'
+import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../utils/postprocessing'
 import Fadeout from "../animate/Fadeout";
 import * as animatesEffect from '../animate'
 import { IConfig, IUser, IOption, IPosition } from "../type";
@@ -65,6 +65,7 @@ class Sign3D extends Base {
     if (this.timer) {
       clearTimeout(this.timer)
     }
+    window.removeEventListener('resize', this.onResize.bind(this), false)
   }
 
   /**
