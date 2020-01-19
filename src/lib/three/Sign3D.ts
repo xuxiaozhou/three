@@ -18,8 +18,8 @@ import {
 import TWEEN from '@tweenjs/tween.js'
 import _ from 'lodash'
 import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from '../utils/postprocessing'
-import Fadeout from "../animate/Fadeout";
-import * as animatesEffect from '../animate'
+import Fadeout from "./animate/Fadeout";
+import * as animatesEffect from './animate'
 import { IConfig, IUser, IOption, IPosition } from "../type";
 import Base from "./Base";
 
