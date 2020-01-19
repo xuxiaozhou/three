@@ -53,9 +53,11 @@ class Lottery3d extends Base {
   private bgColor: string
   private fontSize: string
   private remove: boolean
+  private getPaichuConfig: () => boolean
 
   public constructor(config: IConfig) {
     super(config);
+    this.getPaichuConfig = config.getPaichuConfig
     this.remove = false
     this.showOption = config.showOption || defaultShowOptions
     this.shape = 'Circle'
@@ -129,8 +131,41 @@ class Lottery3d extends Base {
           }
         }
 
-        pushShowUser()
-        this.group.add(...objs)
+        if (this.getPaichuConfig()) {
+          // 中奖排除时的动作
+          if (objs.length <= 20)
+            // 完成每个头像挨个移除的动效
+            await (() => {
+              return new Promise(async resolve => {
+                let f
+                for (let obj of objs) {
+                  await (() => {
+                    return new Promise(R => {
+                      setTimeout(() => {
+                        f = this.removeElement(obj).then(() => {
+                          this.callback('showOne', obj._uInfo)
+                        })
+                        R()
+                      }, 200)
+                    })
+                  })()
+                  users.push(obj._uInfo)
+                }
+                // 最后一个remove结束之后执行
+                f.then(res => {
+                  resolve(res)
+                })
+              })
+            })()
+          else {
+            // 数量超过20个直接删除消失
+            pushShowUser()
+          }
+          this.shineGroup.remove(...objs)
+        } else {
+          pushShowUser()
+          this.group.add(...objs)
+        }
 
         this.lotteryAfter()
 
@@ -228,6 +263,32 @@ class Lottery3d extends Base {
       group: this.group,
       camera: this.camera
     }), 2000);
+  }
+
+
+  private removeElement(obj) {
+    return new Promise(resolve => {
+      let camera = this.camera.clone()
+      let cameraPosition = this.group.worldToLocal(camera.position)
+
+      new TWEEN.Tween(obj.position)
+        .easing(TWEEN.Easing.Back.In)
+        .to(cameraPosition, 1000)
+        .onComplete(() => {
+          resolve()
+        })
+        .start()
+
+      let newObj = obj.clone()
+      newObj.lookAt(cameraPosition)
+
+      // newObj.lookAt(camera.position)
+      let { x, y, z } = newObj.rotation
+
+      new TWEEN.Tween(obj.rotation)
+        .to({ x, y, z }, 800)
+        .start()
+    })
   }
 
   /**

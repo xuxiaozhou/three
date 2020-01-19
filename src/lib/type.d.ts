@@ -10,6 +10,7 @@ export interface IConfig {
   backgroundImage: string,
   backgroundType: '2D' | '3D',
   callback: (status: string) => void,
+  getPaichuConfig?: () => boolean,
   shape?: 'Circle' | 'Round',
   openAnimates?: string[],
   animateSpendTime?: number,
