@@ -29,10 +29,10 @@ import {
   ClearMaskPass
 } from '../utils/postprocessing'
 import MeshText2D from './MeshText2D/MeshText2D'
-import { IConfig, IPosition, IShowOption, ITurnInfo, IUser } from "../type";
+import {IConfig, IPosition, IShowOption, ITurnInfo, IUser} from "../type";
 import Base from "./Base";
-import { Sphere } from './animate';
-import { defaultShowOptions } from '../utils/constant'
+import {Sphere} from './animate';
+import {defaultShowOptions} from '../utils/constant'
 
 class Lottery3d extends Base {
   protected minCount: number = 100;
@@ -88,7 +88,7 @@ class Lottery3d extends Base {
 
     new TWEEN.Tween(this.RotationSpeed)
       .easing(TWEEN.Easing.Exponential.Out)
-      .to({ x: 0, y: 0, z: 0 }, 5000)
+      .to({x: 0, y: 0, z: 0}, 5000)
       .start()
   }
 
@@ -98,7 +98,7 @@ class Lottery3d extends Base {
         this.callback('lottery not ready')
         return
       }
-      const { group, shineGroup } = this
+      const {group, shineGroup} = this
 
       try {
         await this.LotteryInit()
@@ -168,6 +168,8 @@ class Lottery3d extends Base {
         }
 
         this.lotteryAfter()
+
+        this.callback('lottery end')
 
         resolve(users)
       }
@@ -239,8 +241,8 @@ class Lottery3d extends Base {
   }
 
   /**
-  * 抽奖动画结束后的处理
-  */
+   * 抽奖动画结束后的处理
+   */
   private async lotteryAfter() {
     this.callback('lottery waiting')
     await (() => {
@@ -283,17 +285,17 @@ class Lottery3d extends Base {
       newObj.lookAt(cameraPosition)
 
       // newObj.lookAt(camera.position)
-      let { x, y, z } = newObj.rotation
+      let {x, y, z} = newObj.rotation
 
       new TWEEN.Tween(obj.rotation)
-        .to({ x, y, z }, 800)
+        .to({x, y, z}, 800)
         .start()
     })
   }
 
   /**
-  * 获取离摄像机最近的n个元素
-  */
+   * 获取离摄像机最近的n个元素
+   */
   private getNearstObj(n, uInfo = true) {
     let group = this.group
     let camera = this.camera
@@ -407,7 +409,7 @@ class Lottery3d extends Base {
       return this.turnSelectData[user.openid]
     }
 
-    let { image, text } = Lottery3d.turnSelect(user, this.showOption);
+    let {image, text} = Lottery3d.turnSelect(user, this.showOption);
     if (text === '未公开昵称') {
       text = ''
     }
@@ -421,7 +423,7 @@ class Lottery3d extends Base {
       image = false
     }
 
-    const $return = { text, image };
+    const $return = {text, image};
     this.turnSelectData[user.openid] = $return;
     return $return
   }
@@ -515,7 +517,7 @@ class Lottery3d extends Base {
   }
 
   protected createPassRender() {
-    const { renderer } = this
+    const {renderer} = this
     // 创建光源 设为透明
     const sunMaterial = new PointsMaterial({
       size: 0,
@@ -536,7 +538,7 @@ class Lottery3d extends Base {
     this.scene.add(sun)
     this.scene.add(this.group)
 
-    const composer = new EffectComposer(renderer, { stencilBuffer: true, })
+    const composer = new EffectComposer(renderer, {stencilBuffer: true,})
     const clearMaskPass = new ClearMaskPass()
     const renderPass = new RenderPass(this.scene, this.camera)
     const renderPass2 = new RenderPass(this.scene2, this.camera)
