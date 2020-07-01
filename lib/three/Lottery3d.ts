@@ -49,7 +49,7 @@ class Lottery3d extends Base {
   private ready: boolean
   private enableInit: boolean
   private RotationSpeed: { x: number, y: number, z: number }
-  private fillStyle: string
+  private readonly fillStyle: string
   private bgColor: string
   private fontSize: string
   private remove: boolean
