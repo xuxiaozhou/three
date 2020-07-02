@@ -1,9 +1,7 @@
 import Sprite from "./Sprite";
 import {createCanvas} from "./utils";
-
-interface IGlobalConfig {
-  container: HTMLElement,
-}
+import {createId} from "../utils/utils";
+import {IGlobalConfig, IType} from "./interface";
 
 let STATUS = false;
 
@@ -11,6 +9,11 @@ class Scene {
   private container: HTMLElement;
   private containerWidth: number;
   private containerHeight: number;
+  private readonly type: IType;
+
+  private static get status() {
+    return STATUS;
+  }
 
   private set status(status: boolean) {
     if (STATUS === status) {
@@ -35,16 +38,49 @@ class Scene {
 
   private ctx: CanvasRenderingContext2D;
 
-  private sprites: Sprite[] = [];
+  private sprites: { [x: string]: Sprite } = {};
 
-  public constructor({container}: IGlobalConfig) {
+  public constructor(container: HTMLElement, globalConfig: IGlobalConfig) {
     this.initCanvas(container);
+    this.type = globalConfig.type || 'scroll';
     this.status = true;
     window.addEventListener('resize', this.resize.bind(this));
   }
 
   public add(sprite: Sprite) {
-    this.sprites.push(sprite);
+    // todo 计算位置，速度
+    const rect = sprite.calcRect(this.ctx);
+    if (this.type === 'scroll') {
+      sprite.setAnimation({
+        position: [this.containerWidth, rect[1]],
+        speed: [-1, 0],
+        range: [-rect[0]],
+      });
+    }
+    this.sprites[createId('sprite-')] = sprite;
+  }
+
+  public start() {
+    this.status = true;
+  }
+
+  public stop() {
+    this.timer = null;
+    this.status = false;
+  }
+
+  public clear() {
+    this.sprites = {};
+  }
+
+  private run() {
+    if (!Scene.status) {
+      return;
+    }
+
+    this.render();
+    const run = this.run.bind(this);
+    this.timer = window.requestAnimationFrame(run);
   }
 
   private resize() {
@@ -64,25 +100,15 @@ class Scene {
 
   private render() {
     this.ctx.clearRect(0, 0, this.containerWidth, this.containerHeight);
-    this.sprites.forEach(sprite => {
-      sprite.animation();
-      sprite.draw(this.ctx);
-    })
-  }
-
-  private run() {
-    this.render();
-    const run = this.run.bind(this);
-    this.timer = window.requestAnimationFrame(run);
-  }
-
-  public start() {
-    this.status = true;
-  }
-
-  public stop() {
-    this.timer = null;
-    this.status = false;
+    Object.keys(this.sprites).forEach(uid => {
+      const sprite = this.sprites[uid];
+      if (!sprite.status) {
+        delete this.sprites[uid];
+      } else {
+        sprite.animation();
+        sprite.draw(this.ctx);
+      }
+    });
   }
 }
 

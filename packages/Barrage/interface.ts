@@ -1,26 +1,32 @@
-export interface IFontStyle {
-  // 内容颜色
-  fontColor?: string
-  // 字体
-  fontFamily?: string
-  // 字体大小
-  fontSize?: number
+export interface IDanmu {
+  content: string,
+  avatar: string
 }
 
-export interface IDanmu extends IFontStyle {
-  // 弹幕id
-  id: string | number,
-  // 弹幕人头像
-  avatar: string,
-  // 弹幕人名字
-  nickname: string,
-  // 弹幕内容
+export type IPosition = [number, number]
+
+export interface ISprite {
+  avatar?: string,
   content?: string,
-  // 图片
-  image?: string,
+  position?: IPosition,
+  imageSize?: number,
+  radius?: number,
+  fontSize?: number,
+  fontColor?: string,
+  fontFamily?: string,
 }
 
-export interface ISpriteStyle extends IFontStyle {
-  height?: number
-  width?: number,
+export interface IRoundImageArgs {
+  ctx: CanvasRenderingContext2D,
+  img: CanvasImageSource,
+  position: IPosition,
+  radius?: number,
+  imageWidth: number,
+  imageHeight: number
+}
+
+export type IType = 'scroll' | 'reversescroll'
+
+export interface IGlobalConfig {
+  type?: IType
 }

@@ -1,12 +1,12 @@
 export const loadingImage = (src): Promise<CanvasImageSource> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const image = new Image();
     image.src = src;
     image.onload = () => {
       resolve(image);
     };
     image.onerror = () => {
-      reject(null)
+      resolve(null)
     }
   })
 };
