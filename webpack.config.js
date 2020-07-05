@@ -10,6 +10,7 @@ module.exports = {
     main: './src/index.js',
     lottery: './src/lottery.js',
     danmu: './src/danmu.js',
+    draw: './src/draw.js',
   },
   output: {
     filename: '[name].js',
@@ -44,6 +45,11 @@ module.exports = {
       template: 'danmu.html',
       filename: 'danmu.html',
       chunks: ['danmu']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'draw.html',
+      filename: 'draw.html',
+      chunks: ['draw']
     })
   ],
   devtool: 'source-map'

@@ -1,150 +1,207 @@
-import {loadingImage} from "./utils";
-import {IRoundImageArgs, ISprite} from "./interface";
-
-const roundRect = (roundImageArgs: IRoundImageArgs) => {
-  const {
-    ctx,
-    img,
-    position,
-    imageWidth,
-    imageHeight,
-  } = roundImageArgs;
-  let {radius} = roundImageArgs;
-
-  radius = radius > Math.max(imageWidth, imageHeight) / 2 ? Math.max(imageHeight, imageWidth) / 2 : radius;
-  const [x, y] = position;
-  const {width, height} = img as { width: number, height: number };
-
-  ctx.save();
-
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + imageWidth - radius, y);
-  ctx.quadraticCurveTo(x + imageWidth, y, x + imageWidth, y + radius);
-  ctx.lineTo(x + imageWidth, y + imageHeight - radius);
-  ctx.quadraticCurveTo(x + imageWidth, y + imageHeight, x + imageWidth - radius, y + imageHeight);
-  ctx.lineTo(x + radius, y + imageHeight);
-  ctx.quadraticCurveTo(x, y + imageHeight, x, y + imageHeight - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  ctx.clip();
-
-  ctx.drawImage(
-    img,
-    0, 0, width, height,
-    x, y, imageWidth, imageHeight
-  );
-
-  ctx.restore();
-};
-const imageAndTextSpace = 12;
+import {loadingImage, mixConfig} from "./utils";
+import {
+  IAnimationData,
+  ISprite,
+  IFont, IGlobalConfig, IStyle, IRoundImageArgs, IPos,
+} from "./interface";
+import {defaultSpriteConfig, imageAndTextSpace, employTrackSpaceX} from "./constant";
 
 class Sprite {
   public status: boolean = true;
   private speed: [number, number] = [1, 1];
 
   private avatar: CanvasImageSource | string;
-  private readonly imageSize: number = 100;
-  private position: [number, number] = null;
-
-  private readonly padding: [number, number, number, number];
-  private readonly radius: number = 20;
   private readonly content: string;
-  private readonly fontSize: number;
-  private readonly fontColor: string;
-  private readonly fontFamily: string;
-  private rect: [number, number];
-  private range: [number, number];
+  public position: [number, number] = null;
 
-  public constructor(spriteArgs: ISprite) {
+  public rect: [number, number];
+  private rangeWidth?: [number, number];
+
+  private templateCtx: CanvasRenderingContext2D;
+  private style: IStyle;
+  private font: IFont;
+  private readonly templateCanvas: HTMLCanvasElement;
+
+  // 占用起飞跑道标志
+  public employTrack = false;
+
+  public id: string;
+
+  private set avatarStatus(status) {
+    if (status) {
+      this.getImageData();
+    }
+  }
+
+  public constructor(spriteArgs: ISprite, globalConfig: IGlobalConfig) {
     const {
       avatar,
+      fontFamily,
+      fontColor,
+      fontSize,
+      avatarSize,
       content,
-      fontSize = 36,
-      fontColor = '#fff',
-      fontFamily = 'Microsoft YaHei',
-      imageSize = 50,
-      radius = 6
-    } = spriteArgs;
-    this.avatar = avatar;
-    this.fontFamily = fontFamily;
-    this.fontSize = fontSize;
-    this.fontColor = fontColor;
+      padding,
+      radius,
+    } = mixConfig(spriteArgs, defaultSpriteConfig) as ISprite;
     this.content = content;
-    this.imageSize = imageSize;
-    this.radius = radius;
-    this.padding = [12, 12, 12, 12];
+    this.style = {
+      padding,
+      avatarSize,
+      radius
+    };
+    this.font = {
+      fontFamily,
+      fontColor,
+      fontSize,
+    };
 
+    this.loadingImage(avatar);
+
+    this.rect = this.calcRect(globalConfig.ctx);
+    const canvas = document.createElement('canvas');
+    canvas.width = this.rect[0];
+    canvas.height = this.rect[1];
+    this.templateCanvas = canvas;
+
+    this.getImageData();
+  }
+
+  private getImageData() {
+    this.templateCtx = this.templateCanvas.getContext('2d');
+    this.templateCtx.clearRect(0, 0, this.rect[0], this.rect[1]);
+    this.draw(this.templateCtx);
+  }
+
+  public render(ctx) {
+    ctx.drawImage(
+      this.templateCanvas,
+      ...this.position
+    )
+  }
+
+  private loadingImage(avatar) {
     (async () => {
-      if (this.avatar) {
-        // todo 默认图片
-        this.avatar = await loadingImage(this.avatar) || ''
+      if (avatar) {
+        // 头像
+        this.avatar = await loadingImage(avatar) || null;
+        this.avatarStatus = true;
       }
-    })();
+    })()
   }
 
   // 计算尺寸
-  public calcRect(ctx): [number, number] {
-    if (this.rect) {
-      return this.rect;
-    }
-
-    const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.padding;
+  private calcRect(ctx: CanvasRenderingContext2D): [number, number] {
+    const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.style.padding;
     ctx.save();
-    ctx.font = `${this.fontSize}px ${this.fontFamily}`;
+    ctx.font = `${this.font.fontSize}px ${this.font.fontFamily}`;
     const measureText = ctx.measureText(this.content);
     ctx.restore();
 
     const barrageAllWidth = (
-      this.imageSize + imageAndTextSpace + measureText.width +
+      this.style.avatarSize + imageAndTextSpace + measureText.width +
       paddingLeft + paddingRight
     );
 
     const barrageAllHeight = (
-      Math.max(this.imageSize, this.fontSize) +
+      Math.max(this.style.avatarSize, this.font.fontSize) +
       paddingTop + paddingBottom
     );
-    this.rect = [barrageAllWidth, barrageAllHeight];
-
-    return this.rect;
+    return [Math.floor(barrageAllWidth), barrageAllHeight];
   }
 
   // 设置关于运动的参数
-  public setAnimation({position, speed, range}) {
+  public setAnimation({position, speed, rangeWidth}: IAnimationData) {
     this.position = position;
     this.speed = speed;
-    this.range = range;
+    this.rangeWidth = rangeWidth;
   }
 
-  // todo 缓存优化
-  public draw(ctx: CanvasRenderingContext2D) {
-    ctx.save();
-
-    const [left, top] = this.position;
+  private draw(ctx: CanvasRenderingContext2D) {
+    const [, , left] = this.style.padding;
 
     // 头像
-    if (typeof this.avatar !== 'string') {
-      roundRect({
-          ctx,
+    const avatarSpaceTop = (this.rect[1] - this.style.avatarSize) / 2;
+    if (this.avatar && typeof this.avatar !== 'string') {
+      Sprite.drawAvatar(
+        ctx,
+        {
           img: this.avatar,
-          position: [left, top],
-          imageHeight: this.imageSize,
-          imageWidth: this.imageSize,
-          radius: this.radius,
+          position: [left, avatarSpaceTop],
+          imageHeight: this.style.avatarSize,
+          imageWidth: this.style.avatarSize,
+          radius: this.style.radius,
         }
       );
     } else {
       // todo 留出位置
     }
 
-    ctx.fillStyle = this.fontColor;
-    ctx.font = `${this.fontSize}px ${this.fontFamily}`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    const space = this.fontSize < this.imageSize ? (this.imageSize - this.fontSize) / 2 : 0;
-    ctx.fillText(this.content, this.imageSize + left + imageAndTextSpace, top + space);
+    const textSpaceTop = (this.rect[1] - this.font.fontSize - 5) / 2;
+    this.drawText(ctx, {
+      left: this.style.avatarSize + imageAndTextSpace + left,
+      top: textSpaceTop
+    });
 
+    this.drawBorder(ctx);
+  }
+
+  private static checkEmployTrack({left, width, type, containerWidth}) {
+    if (type === 'reversescroll') {
+      if (left > employTrackSpaceX) {
+        return false;
+      }
+    }
+
+    if (type === 'scroll') {
+      if (left < containerWidth - width - employTrackSpaceX) {
+        return false;
+      }
+    }
+
+    return true
+  }
+
+  public animation({type, containerWidth}) {
+    if (!this.position) {
+      return;
+    }
+
+    const left = this.position[0] + this.speed[0];
+    const top = this.position[1] + this.speed[1];
+
+    const offsetWidth = (
+      this.rangeWidth &&
+      (
+        this.rangeWidth[0] > left ||
+        this.rangeWidth[1] < left
+      )
+    );
+
+    if (offsetWidth) {
+      this.status = false;
+      return;
+    }
+
+    this.position = [left, top];
+
+    if (this.employTrack) {
+      this.employTrack = Sprite.checkEmployTrack({
+        left,
+        type,
+        containerWidth,
+        width: this.rect[0],
+      });
+    }
+  }
+
+  public remove() {
+    this.status = false
+  }
+
+  private drawBorder(ctx: CanvasRenderingContext2D, pos: IPos = {}) {
+    const {left = 0, top = 0} = pos;
+    const [barrageAllWidth, barrageAllHeight] = this.rect;
     //x轴方向的阴影偏移量,负数为向右偏移量
     ctx.shadowOffsetX = 3;
     //y轴方向的阴影偏移量,负数为向上偏移量
@@ -153,41 +210,66 @@ class Sprite {
     ctx.shadowBlur = 12;
     ctx.shadowColor = "rgba(46, 141, 239, 0.4)";
     ctx.strokeStyle = 'rgba(46, 141, 239, 1)';
-
-    const [paddingTop, paddingLeft] = this.padding;
-
-    const [barrageAllWidth, barrageAllHeight] = this.calcRect(ctx);
     ctx.strokeRect(
-      left - paddingLeft, top - paddingTop,
+      left, top,
       barrageAllWidth,
       barrageAllHeight,
     );
+  }
+
+  private drawText(ctx: CanvasRenderingContext2D, {left = 0, top = 0}: { top: number, left: number }) {
+    ctx.fillStyle = this.font.fontColor;
+    ctx.font = `${this.font.fontSize}px ${this.font.fontFamily}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(
+      this.content,
+      left,
+      top
+    );
+  }
+
+  private static drawAvatar(ctx, roundImageArgs: IRoundImageArgs) {
+    const {
+      img,
+      imageWidth,
+      imageHeight,
+      position,
+    } = roundImageArgs;
+    let {radius} = roundImageArgs;
+
+    radius = radius > Math.max(imageWidth, imageHeight) / 2 ? Math.max(imageHeight, imageWidth) / 2 : radius;
+    const [x, y] = position;
+
+    ctx.save();
+
+    if (img) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + imageWidth - radius, y);
+      ctx.quadraticCurveTo(x + imageWidth, y, x + imageWidth, y + radius);
+      ctx.lineTo(x + imageWidth, y + imageHeight - radius);
+      ctx.quadraticCurveTo(x + imageWidth, y + imageHeight, x + imageWidth - radius, y + imageHeight);
+      ctx.lineTo(x + radius, y + imageHeight);
+      ctx.quadraticCurveTo(x, y + imageHeight, x, y + imageHeight - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.clip();
+
+      const {width, height} = img as { width: number, height: number };
+
+      ctx.drawImage(
+        img,
+        0, 0, width, height,
+        x, y, imageWidth, imageHeight
+      );
+    } else {
+    }
 
     ctx.restore();
-  }
+  };
 
-  public animation() {
-    if (!this.position) {
-      return;
-    }
-
-    const left = this.position[0] + this.speed[0];
-    const top = this.position[1] + this.speed[1];
-
-    if (
-      (this.range[0] && left < this.range[0]) ||
-      (this.range[1] && top > this.range[1])
-    ) {
-      this.status = false;
-      return;
-    }
-
-    this.position = [left, top];
-  }
-
-  public remove() {
-    this.status = false
-  }
 }
 
 export default Sprite;

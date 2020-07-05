@@ -1,25 +1,20 @@
 import Scene from "./Scene";
 import Sprite from "./Sprite";
 import {IDanmu, IGlobalConfig} from "./interface";
-
-// 如何保证不同字号的弹幕不碰撞
-// 弹幕的位置计算
-// 弹幕的速度控制及动画实现
-// 弹幕与视频的同步
-
-// 跑道
-// 塔台
-// 飞机
+import {mixConfig} from "./utils";
+import {defaultGlobalConfig} from "./constant";
 
 class Barrage {
   private readonly scene: Scene;
   public stop: () => void;
   public start: () => void;
   public clear: () => void;
+  private readonly globalConfig: IGlobalConfig;
 
   public constructor(container: HTMLElement, globalConfig: IGlobalConfig = {}) {
+    this.globalConfig = mixConfig(globalConfig, defaultGlobalConfig) as IGlobalConfig;
     // 创建场景
-    this.scene = new Scene(container, globalConfig);
+    this.scene = new Scene(container, this.globalConfig);
 
     this.stop = this.scene.stop.bind(this.scene);
     this.start = this.scene.start.bind(this.scene);
@@ -29,11 +24,12 @@ class Barrage {
   public add({content, avatar}: IDanmu) {
     this.scene.add(
       new Sprite({
-        avatar,
-        content,
+        avatar, content
+      }, {
+        ctx: this.scene.ctx,
       })
     );
   }
 }
 
-export default Barrage
+export default Barrage;

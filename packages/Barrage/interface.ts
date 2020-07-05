@@ -3,21 +3,30 @@ export interface IDanmu {
   avatar: string
 }
 
-export type IPosition = [number, number]
+export interface IFont {
+  fontFamily?: string;
+  fontSize?: number;
+  fontColor?: string
+}
 
-export interface ISprite {
+export type IPosition = [number, number]
+export type ISpriteType = 'text' | 'image';
+
+export interface IStyle {
+  padding?: [number, number, number, number],
+  radius?: number,
+  avatarSize?: number,
+}
+
+export interface ISprite extends IFont, IStyle {
   avatar?: string,
   content?: string,
   position?: IPosition,
   imageSize?: number,
-  radius?: number,
-  fontSize?: number,
-  fontColor?: string,
-  fontFamily?: string,
+  type?: ISpriteType,
 }
 
 export interface IRoundImageArgs {
-  ctx: CanvasRenderingContext2D,
   img: CanvasImageSource,
   position: IPosition,
   radius?: number,
@@ -28,5 +37,18 @@ export interface IRoundImageArgs {
 export type IType = 'scroll' | 'reversescroll'
 
 export interface IGlobalConfig {
-  type?: IType
+  type?: IType,
+  lifeTime?: number,
+  ctx?: CanvasRenderingContext2D,
+}
+
+export interface IAnimationData {
+  position: IPosition,
+  speed: IPosition,
+  rangeWidth: IPosition | undefined
+}
+
+export interface IPos {
+  left?: number,
+  top?: number
 }
