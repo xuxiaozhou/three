@@ -1,8 +1,9 @@
 import Sprite from "./Sprite";
-import {createCanvas, getCanUseTrack} from "./utils";
+import {getCanUseTrack} from "./utils";
 import {createId} from "../utils/utils";
 import {IGlobalConfig, IAnimationData} from "./interface";
 import {screenSpace} from "./constant";
+import {createCanvas} from "../utils/utils";
 
 let STATUS = false;
 
@@ -151,6 +152,8 @@ class Scene {
     this.containerWidth = offsetWidth;
     this.containerHeight = offsetHeight;
     const canvas = createCanvas('canvas-huiyidun', offsetWidth, offsetHeight);
+    canvas.style.position = 'absolute';
+    canvas.style.display = 'block';
     this.container.append(canvas);
     this.ctx = canvas.getContext('2d');
 
