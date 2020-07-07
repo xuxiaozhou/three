@@ -10,7 +10,12 @@ const generateConfig = (entry, outputName) => ({
     {
       file: `dist/${outputName}.js`,
       format: 'cjs'
-    }
+    },
+    {
+      file: `dist/${outputName}.umd.js`,
+      format: 'umd',
+      name: outputName
+    },
   ],
   plugins: [
     commonjs(),
@@ -46,4 +51,5 @@ export default [
   // },
   generateConfig('Barrage/index.ts', 'Barrage'),
   generateConfig('Draw/index.ts', 'Draw'),
+  generateConfig('3d/Sign3d.ts', 'Sign3d'),
 ];
