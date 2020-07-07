@@ -12,20 +12,39 @@
       height: 100%;
     }
 
-    #webgl {
+    .webgl {
       height: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
       background: #162129;
       background-size: 100% 100%;
+    }
+
+    .display-flex {
+      display: flex;
+      height: 100%;
+    }
+
+    .flex-1 {
+      flex: 1;
+    }
+
+    .space {
+      background: #fff;
+      width: 20px;
     }
   </style>
 </head>
 
 <body>
-  <div id="webgl"></div>
+<div class="display-flex">
+  <div class="flex-1">
+    <div id="webgl1" class="webgl"></div>
+  </div>
+  <div class="space"></div>
+  <div class="flex-1">
+    <div id="webgl2" class="webgl"></div>
+  </div>
+</div>
 </body>
 
 </html>

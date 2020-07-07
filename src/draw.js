@@ -1,5 +1,15 @@
 import Draw from '../packages/Draw';
 
-new Draw({
-  container: document.getElementById('webgl')
+const w2 = new Draw({
+  container: document.getElementById('webgl2'),
+  type: 'show'
 });
+
+new Draw({
+  container: document.getElementById('webgl1'),
+  onSync(action) {
+    w2.draw(action);
+  }
+});
+
+

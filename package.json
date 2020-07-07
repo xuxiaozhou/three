@@ -20,10 +20,9 @@
   },
   "homepage": "https://github.com/xuxiaozhou/three#readme",
   "dependencies": {
-    "@tweenjs/tween.js": "^17.1.0",
     "axios": "^0.19.2",
     "lodash": "^4.17.15",
-    "three": "^0.87.1"
+    "three": "^0.118.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.10.4",
