@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --open",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "build:webpack": "webpack"
   },
   "repository": {
     "type": "git",

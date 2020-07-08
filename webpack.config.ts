@@ -15,11 +15,14 @@ const htmlPlugins = entry.map(name => {
   });
 });
 
+const entries = entry.reduce((obj, name) => ({
+  ...obj,
+  [name]: `./src/${name}.js`
+}), {});
+console.log(entries);
+
 module.exports = {
-  entry: entry.reduce((obj, name) => ({
-    ...obj,
-    [name]: `./src/${name}.js`
-  }), {}),
+  entry: entries,
   output: {
     filename: '[name].js',
     path: resolve('dist')

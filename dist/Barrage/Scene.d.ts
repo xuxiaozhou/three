@@ -1,0 +1,30 @@
+import Sprite from "./Sprite";
+import { IGlobalConfig } from "./interface";
+declare class Scene {
+    private container;
+    private containerWidth;
+    private containerHeight;
+    private globalConfig;
+    private trackTop;
+    private static get status();
+    private set status(value);
+    private timer;
+    ctx: CanvasRenderingContext2D;
+    private sprites;
+    private queue;
+    private employTrack;
+    constructor(container: HTMLElement, globalConfig: IGlobalConfig);
+    private calcAnimation;
+    add(sprite: Sprite): void;
+    private addSprite;
+    private calcEmployTrack;
+    private calcPosition;
+    start(): void;
+    stop(): void;
+    clear(): void;
+    private run;
+    private resize;
+    private initCanvas;
+    private render;
+}
+export default Scene;

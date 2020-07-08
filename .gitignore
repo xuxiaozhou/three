@@ -5,4 +5,3 @@ out/
 .idea/
 *.db
 .history/
-dist/
