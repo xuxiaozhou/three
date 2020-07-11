@@ -1,29 +1,17 @@
-export interface IDanmu {
-  content: string,
-  avatar: string
-}
+export type IPosition = [number, number]
 
-export interface IFont {
+export interface ISpriteConfig {
+  content?: string,
+  avatar?: string,
+  position?: IPosition,
+  imageSize?: number,
+  type?: 'text' | 'image',
   fontFamily?: string;
   fontSize?: number;
-  fontColor?: string
-}
-
-export type IPosition = [number, number]
-export type ISpriteType = 'text' | 'image';
-
-export interface IStyle {
+  fontColor?: string,
   padding?: [number, number, number, number],
   radius?: number,
   avatarSize?: number,
-}
-
-export interface ISprite extends IFont, IStyle {
-  avatar?: string,
-  content?: string,
-  position?: IPosition,
-  imageSize?: number,
-  type?: ISpriteType,
 }
 
 export interface IRoundImageArgs {
@@ -36,10 +24,19 @@ export interface IRoundImageArgs {
 
 export type IType = 'scroll' | 'reversescroll'
 
-export interface IGlobalConfig {
+export interface ICalcGlobalConfig {
+  containerHeight?: number,
+  containerWidth?: number,
+  trackRange?: [number, number],
+}
+
+export interface IGlobalConfig extends ICalcGlobalConfig {
   type?: IType,
   lifeTime?: number,
   ctx?: CanvasRenderingContext2D,
+  templateCtx?: CanvasRenderingContext2D,
+  templateCanvas?: HTMLCanvasElement,
+  canvas?: HTMLCanvasElement,
 }
 
 export interface IAnimationData {
@@ -48,7 +45,9 @@ export interface IAnimationData {
   rangeWidth: IPosition | undefined
 }
 
-export interface IPos {
-  left?: number,
-  top?: number
+export type AvatarImage = string | CanvasImageSource;
+
+export interface IDrawOptions {
+  avatarImage: AvatarImage,
+  size: IPosition
 }

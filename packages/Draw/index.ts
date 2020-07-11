@@ -6,11 +6,15 @@ type IDrawType = 'start' | 'move' | 'end' | 'clear' | 'undo' | 'redo';
 
 type IOnSync = (action: IAction) => void
 
-interface IConfig {
+interface ICtxStyle {
+  lineWidth?: number,
+  lineColor?: string,
+}
+
+interface IConfig extends ICtxStyle {
   container: HTMLElement,
   // 可以 draw 画 或者 show 纯展示
   type: IType,
-  lineWidth: number,
   onSync?: IOnSync
 }
 
@@ -31,6 +35,7 @@ interface IAction {
  * - [ ] 选择线粗细，颜色
  * - [ ] 保存图片
  * - [ ] 笔画更细腻
+ * - [ ] 旋转
  */
 class Draw {
   private readonly containerWidth: number;
@@ -39,23 +44,33 @@ class Draw {
   public ctx: CanvasRenderingContext2D;
   private readonly lineWidth: number;
   private readonly onSync: IOnSync | undefined;
+  private readonly lineColor: string;
+  private canvas: HTMLCanvasElement;
+  private cashList: string[] = [];
+  private index: number = -1;
 
   public constructor(config: IConfig) {
-    const {container, type, lineWidth, onSync} = config;
+    const {container, type, lineWidth, onSync, lineColor} = config;
     this.containerWidth = container.offsetWidth;
     this.containerHeight = container.offsetHeight;
     this.type = type || 'draw';
-    this.lineWidth = lineWidth || 5;
+
+    this.lineColor = lineColor || '#fff';
+    this.lineWidth = lineWidth || 10;
+
     this.onSync = onSync;
     this.initCanvas(container);
   }
 
   private initCanvas(container) {
     const canvas = createCanvas('draw', this.containerWidth, this.containerHeight);
+
     if (this.type === 'draw') {
       const start = this.action.bind(this, 'start');
-      const move = this.action.bind(this, 'move');
       const end = this.action.bind(this, 'end');
+      const move = (e) => {
+        this.action('move', e)
+      };
 
       canvas.addEventListener('touchstart', start);
       canvas.addEventListener('mousedown', e => {
@@ -70,10 +85,10 @@ class Draw {
       });
     }
 
-    this.ctx = canvas.getContext('2d');
-    this.ctx.strokeStyle = '#fff';
-
     container.appendChild(canvas);
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+
   }
 
   private static getPoint(e): IPoint {
@@ -90,8 +105,32 @@ class Draw {
     }
   }
 
+  public setCtx(ctxStyle: ICtxStyle = {}) {
+    Object.keys(ctxStyle).forEach(attr => {
+      this.ctx[attr] = ctxStyle[attr];
+
+      if (attr === 'lineColor') {
+        this.ctx.strokeStyle = ctxStyle.lineColor;
+      }
+    })
+  }
+
+  private prepareCtx() {
+    this.ctx.lineWidth = this.lineWidth;
+    this.ctx.shadowBlur = 1;
+    this.ctx.shadowColor = this.lineColor;
+    this.ctx.strokeStyle = this.lineColor;
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+  }
+
+  private record() {
+    this.cashList.push(this.canvas.toDataURL());
+  }
+
   public draw(action: IAction) {
     const {type, point} = action;
+    this.prepareCtx();
 
     if (type === 'start') {
       this.ctx.beginPath();
@@ -99,31 +138,63 @@ class Draw {
       this.ctx.moveTo(point.x - this.lineWidth / 16, point.y - this.lineWidth / 16);
       this.ctx.lineTo(point.x, point.y);
       this.ctx.stroke();
+      this.record();
       return;
     }
 
     if (type === 'move') {
       this.ctx.lineTo(point.x, point.y);
       this.ctx.stroke();
+      this.record();
       return;
     }
 
     if (type === 'end') {
       this.ctx.closePath();
+      this.record();
       return;
     }
 
     if (type === 'clear') {
-      this.ctx.clearRect(0, 0, this.containerWidth, this.containerHeight);
+      this.index = -1;
+      this.clear();
       return;
     }
 
+    // 撤消（回到上一步）
     if (type === 'undo') {
-      // 撤消（回到上一步）
+      if (this.index === -1) {
+        this.index = this.cashList.length;
+      }
+
+      if (this.index === 0) {
+        return;
+      }
+
+      this.index -= 1;
+      this.repaintByCashList();
     }
 
     if (type === 'redo') {
       // 重做（往前一步）
+      if (this.index === this.cashList.length - 1) {
+        return;
+      }
+      this.index += 1;
+      this.repaintByCashList();
+    }
+  }
+
+  private clear() {
+    this.ctx.clearRect(0, 0, this.containerWidth, this.containerHeight);
+  }
+
+  private repaintByCashList() {
+    const image = new Image();
+    image.src = this.cashList[this.index];
+    image.onload = () => {
+      this.clear();
+      this.ctx.drawImage(image, 0, 0, image.width, image.height);
     }
   }
 
@@ -139,6 +210,10 @@ class Draw {
     }
 
     this.draw(action);
+  }
+
+  public getImage() {
+    return this.canvas.toDataURL('image/png');
   }
 }
 

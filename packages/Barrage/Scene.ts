@@ -1,186 +1,134 @@
 import Sprite from "./Sprite";
-import {getCanUseTrack} from "./utils";
-import {createId} from "../utils/utils";
 import {IGlobalConfig, IAnimationData} from "./interface";
-import {screenSpace} from "./constant";
-import {createCanvas} from "../utils/utils";
-
-let STATUS = false;
+import TrackManager from "./utils/TrackManager";
 
 class Scene {
-  private container: HTMLElement;
-  private containerWidth: number;
-  private containerHeight: number;
   private globalConfig: IGlobalConfig;
-  private trackTop: [number, number];
-
-  private static get status() {
-    return STATUS;
-  }
-
-  private set status(status: boolean) {
-    if (STATUS === status) {
-      return
-    }
-
-    STATUS = status;
-
-    if (!STATUS) {
-      this.stop();
-      return;
-    }
-
-    if (this.timer !== null) {
-      return;
-    }
-
-    this.run();
-  }
+  private trackManger: TrackManager;
 
   private timer = null;
 
-  public ctx: CanvasRenderingContext2D;
+  // 精灵实例map
+  private spriteInstances: { [x: string]: Sprite } = {};
 
-  private sprites: { [x: string]: Sprite } = {};
+  // 需要加入的精灵
+  private needAddSpriteList: Sprite[] = [];
 
-  private queue: Sprite[] = [];
-
-  private employTrack: { [spriteId: string]: string } = {};
-
-  public constructor(container: HTMLElement, globalConfig: IGlobalConfig) {
-    this.initCanvas(container);
+  public constructor(globalConfig: IGlobalConfig) {
     this.globalConfig = globalConfig;
-    this.status = true;
-    window.addEventListener('resize', this.resize.bind(this));
+    this.trackManger = new TrackManager(globalConfig);
+
+    this.start();
   }
 
   private calcAnimation(rect, top = 12): IAnimationData {
     const [barrageWidth] = rect;
 
     if (this.globalConfig.type === 'reversescroll') {
-      const speedX = (this.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
+      const speedX = (this.globalConfig.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
       return {
         position: [-barrageWidth, top],
         speed: [speedX, 0],
-        rangeWidth: [-barrageWidth, this.containerWidth + barrageWidth]
+        rangeWidth: [-barrageWidth, this.globalConfig.containerWidth + barrageWidth]
       }
     }
 
     // scroll
-    const speedX = -(this.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
+    const speedX = -(this.globalConfig.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
     return {
-      position: [this.containerWidth, top],
+      position: [this.globalConfig.containerWidth, top],
       speed: [speedX, 0],
-      rangeWidth: [-barrageWidth, this.containerWidth],
+      rangeWidth: [-barrageWidth, this.globalConfig.containerWidth],
     };
   }
 
   public add(sprite: Sprite) {
-    sprite.id = createId('sprite-');
-    this.queue.push(sprite);
+    this.needAddSpriteList.push(sprite);
   }
 
   private addSprite(sprite: Sprite, top: number) {
-    sprite.setAnimation(this.calcAnimation(sprite.rect, top));
-    this.sprites[sprite.id] = sprite;
+    sprite.setAnimation(this.calcAnimation(sprite.size, top));
+    this.spriteInstances[sprite.id] = sprite;
   }
 
-  private calcEmployTrack(height: number): null | [number, number] {
-    const employ = Object.values(this.employTrack);
-    const employTrackPosition: [number, number] | null = getCanUseTrack(
-      employ,
-      this.trackTop,
-      height,
-    );
-
-    if (employTrackPosition) {
-      return employTrackPosition;
-    }
-
-    return null;
-  }
-
-  private calcPosition() {
-    if (this.queue.length === 0) {
+  private tryToAddSprite() {
+    if (this.needAddSpriteList.length === 0) {
       return
     }
 
-    const [sprite] = this.queue;
-    const [, height] = sprite.rect;
+    const [sprite] = this.needAddSpriteList;
+    const top = this.trackManger.applyPosition(sprite);
 
-    const employTrackPosition = this.calcEmployTrack(height);
-    if (employTrackPosition) {
-      this.employTrack[sprite.id] = employTrackPosition.toString();
-      sprite.employTrack = true;
-      this.addSprite(sprite, employTrackPosition[0]);
-      this.queue.shift();
+    if (top) {
+      this.addSprite(sprite, top);
+      this.needAddSpriteList.shift();
+    }
+  }
+
+  public resetGlobalConfig(globalConfig: IGlobalConfig) {
+    this.globalConfig = {
+      ...this.globalConfig,
+      ...globalConfig,
     }
   }
 
   public start() {
-    this.status = true;
+    if (!this.timer) {
+      this.run();
+    }
   }
 
   public stop() {
-    this.timer = null;
-    this.status = false;
+    if (this.timer) {
+      window.cancelAnimationFrame(this.timer);
+      this.timer = null;
+    }
   }
 
   public clear() {
-    this.sprites = {};
+    this.spriteInstances = {};
   }
 
-  private run() {
-    if (!Scene.status) {
-      return;
-    }
+  public destroy() {
+    this.stop();
+    this.clear();
+  }
 
-    this.calcPosition();
+  private run = () => {
+    this.tryToAddSprite();
     this.render();
-    const run = this.run.bind(this);
-    this.timer = window.requestAnimationFrame(run);
-  }
+    this.timer = window.requestAnimationFrame(this.run);
+  };
 
-  private resize() {
-    this.containerWidth = this.container.offsetWidth;
-    this.containerHeight = this.container.offsetHeight;
-  }
+  private drawTemplateCanvas() {
+    this.globalConfig.templateCtx.clearRect(0, 0, this.globalConfig.containerWidth, this.globalConfig.containerHeight);
 
-  private initCanvas(container: HTMLElement) {
-    const {offsetWidth, offsetHeight} = container;
-    this.container = container;
-    this.containerWidth = offsetWidth;
-    this.containerHeight = offsetHeight;
-    const canvas = createCanvas('canvas-huiyidun', offsetWidth, offsetHeight);
-    canvas.style.position = 'absolute';
-    canvas.style.display = 'block';
-    this.container.append(canvas);
-    this.ctx = canvas.getContext('2d');
+    Object.keys(this.spriteInstances).forEach(uid => {
+      try {
+        const sprite = this.spriteInstances[uid];
 
-    this.trackTop = [screenSpace, this.containerHeight - screenSpace];
+        sprite.animation();
+
+        this.trackManger.removeEmployWithNotEmploy(sprite);
+
+        if (!sprite.status) {
+          delete this.spriteInstances[uid];
+        } else {
+          sprite.render(this.globalConfig.templateCtx);
+        }
+      } catch (e) {
+      }
+    });
   }
 
   private render() {
-    this.ctx.clearRect(0, 0, this.containerWidth, this.containerHeight);
+    this.drawTemplateCanvas();
 
-    Object.keys(this.sprites).forEach(uid => {
-      const sprite = this.sprites[uid];
-
-      sprite.animation({
-        type: this.globalConfig.type,
-        containerWidth: this.containerWidth,
-      });
-
-      if (!sprite.employTrack && this.employTrack[sprite.id]) {
-        delete this.employTrack[sprite.id];
-      }
-
-      if (!sprite.status) {
-        delete this.sprites[uid];
-      } else {
-        sprite.render(this.ctx);
-      }
-    });
+    this.globalConfig.ctx.clearRect(0, 0, this.globalConfig.containerWidth, this.globalConfig.containerHeight);
+    this.globalConfig.ctx.drawImage(
+      this.globalConfig.templateCanvas,
+      0, 0,
+    )
   }
 }
 

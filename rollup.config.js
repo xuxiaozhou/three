@@ -8,11 +8,11 @@ const generateConfig = (entry, outputName) => ({
   external: Object.keys(pkg.dependencies),
   output: [
     {
-      file: `dist/${outputName}.js`,
+      file: `lib/${outputName}.js`,
       format: 'cjs'
     },
     {
-      file: `dist/${outputName}.umd.js`,
+      file: `lib/${outputName}.umd.js`,
       format: 'umd',
       name: outputName
     },

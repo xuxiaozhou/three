@@ -19,7 +19,6 @@ const entries = entry.reduce((obj, name) => ({
   ...obj,
   [name]: `./src/${name}.js`
 }), {});
-console.log(entries);
 
 module.exports = {
   entry: entries,
