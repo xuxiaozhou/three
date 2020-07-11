@@ -1,6 +1,6 @@
 {
   "name": "hudong-three",
-  "version": "1.0.12",
+  "version": "1.0.15",
   "description": "",
   "main": "lib/hudong.js",
   "scripts": {
