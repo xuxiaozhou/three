@@ -9,8 +9,8 @@
 - 手绘板
 
 ## 弹幕
-```
-import Barrage from 'hudong-three/Barrage';
+```javascript
+import {Barrage} from 'hudong-three';
 
 const barrage = new Barrage(
   document.getElementById('webgl'),
