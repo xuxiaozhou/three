@@ -13,7 +13,6 @@ const defaultGlobalConfig: IGlobalConfig = {
 
 const defaultSpriteConfig: ISpriteConfig = {
   fontSize: 36,
-  fontColor: '#fff',
   fontFamily: 'Microsoft YaHei',
   avatarSize: 50,
   type: 'text',

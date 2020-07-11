@@ -5,7 +5,7 @@ const resolve = (pathName) => (
   path.resolve(__dirname, pathName)
 );
 
-const entry = ['index', 'lottery', 'danmu', 'draw', 'sign3d'];
+const entry = ['index', 'lottery3d', 'danmu', 'draw', 'sign3d'];
 
 const htmlPlugins = entry.map(name => {
   return new HtmlWebpackPlugin({

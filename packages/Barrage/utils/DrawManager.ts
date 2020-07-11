@@ -1,4 +1,12 @@
-import {IDrawOptions, IGlobalConfig, IRoundImageArgs, ISpriteConfig} from "../interface";
+import {IDrawOptions, IGlobalConfig, ISpriteConfig} from "../interface";
+
+export interface IRoundImageArgs {
+  img: CanvasImageSource,
+  position: [number, number],
+  radius?: number,
+  imageWidth: number,
+  imageHeight: number
+}
 
 const imageAndTextSpace = 12;
 

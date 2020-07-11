@@ -1,4 +1,4 @@
-import typescript from 'rollup-plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
@@ -49,7 +49,5 @@ export default [
   //     typescript()
   //   ]
   // },
-  generateConfig('Barrage/index.ts', 'Barrage'),
-  generateConfig('Draw/index.ts', 'Draw'),
-  generateConfig('3d/Sign3d.ts', 'Sign3d'),
+  generateConfig('index.ts', 'hudong'),
 ];

@@ -1,4 +1,4 @@
-import Barrage from '../packages/Barrage';
+import { Barrage } from '../packages';
 
 window.barrage = new Barrage(
   document.getElementById('webgl'),

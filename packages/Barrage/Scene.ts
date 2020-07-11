@@ -17,7 +17,6 @@ class Scene {
   public constructor(globalConfig: IGlobalConfig) {
     this.globalConfig = globalConfig;
     this.trackManger = new TrackManager(globalConfig);
-
     this.start();
   }
 

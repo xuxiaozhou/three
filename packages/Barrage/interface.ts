@@ -14,14 +14,6 @@ export interface ISpriteConfig {
   avatarSize?: number,
 }
 
-export interface IRoundImageArgs {
-  img: CanvasImageSource,
-  position: IPosition,
-  radius?: number,
-  imageWidth: number,
-  imageHeight: number
-}
-
 export type IType = 'scroll' | 'reversescroll'
 
 export interface ICalcGlobalConfig {

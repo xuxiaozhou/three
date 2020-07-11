@@ -1,34 +1,24 @@
-import { IAnimationData, ISprite, IGlobalConfig } from "./interface";
+import { IAnimationData, IGlobalConfig, ISpriteConfig } from "./interface";
 declare class Sprite {
+    id: string;
     status: boolean;
+    private position;
     private speed;
-    private avatar;
-    private readonly content;
-    position: [number, number];
-    rect: [number, number];
+    size: [number, number];
     private rangeWidth?;
     private templateCtx;
-    private style;
-    private font;
+    private avatarImage?;
     private readonly templateCanvas;
+    private readonly drawManager;
     employTrack: boolean;
-    id: string;
-    private set avatarStatus(value);
-    constructor(spriteArgs: ISprite, globalConfig: IGlobalConfig);
+    private spriteConfig;
+    private globalConfig;
+    constructor(spriteConfig: ISpriteConfig, globalConfig: IGlobalConfig);
     private getImageData;
     render(ctx: any): void;
-    private loadingImage;
-    private calcRect;
     setAnimation({ position, speed, rangeWidth }: IAnimationData): void;
-    private draw;
-    private static checkEmployTrack;
-    animation({ type, containerWidth }: {
-        type: any;
-        containerWidth: any;
-    }): void;
+    private checkEmployTrack;
+    animation(): void;
     remove(): void;
-    private drawBorder;
-    private drawText;
-    private static drawAvatar;
 }
 export default Sprite;
