@@ -69,3 +69,4 @@ new Draw({
 - [x] rollup.js 生成定义文件
 - [ ] 3d抽奖
 - [ ] 3d签到墙
+- [ ] demo

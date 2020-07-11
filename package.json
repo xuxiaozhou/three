@@ -1,7 +1,7 @@
 {
   "name": "hudong-three",
-  "version": "1.0.15",
-  "description": "",
+  "version": "1.0.16",
+  "description": "互动所用到的应用",
   "main": "lib/hudong.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
