@@ -10,12 +10,7 @@ const generateConfig = (entry, outputName) => ({
     {
       file: `lib/${outputName}.js`,
       format: 'cjs'
-    },
-    {
-      file: `lib/${outputName}.umd.js`,
-      format: 'umd',
-      name: outputName
-    },
+    }
   ],
   plugins: [
     commonjs(),
@@ -24,30 +19,17 @@ const generateConfig = (entry, outputName) => ({
   ]
 });
 
-export default [
-  // {
-  //   input: 'packages/index.ts',
-  //   external,
-  //   output: [
-  //     { file: pkg.main, format: 'cjs' }
-  //   ],
-  //   plugins: [
-  //     commonjs({
-  //       namedExports: {
-  //         './packages/utils/postprocessing': [
-  //           'EffectComposer', 'RenderPass',
-  //           'GodRaysPass', 'KernelSize',
-  //           'ClearMaskPass',
-  //           'ShaderPass',
-  //           'MaskPass',
-  //           'ToneMappingPass',
-  //           'CopyMaterial',
-  //         ]
-  //       }
-  //     }),
-  //     nodeResolve(),
-  //     typescript()
-  //   ]
-  // },
-  generateConfig('index.ts', 'hudong'),
-];
+const map = {
+  Draw: 'Draw/index.ts',
+  Lottery3d: 'Lottery3d/index.ts',
+  Sign3D: 'Sign3D/index.ts',
+  Barrage: 'Barrage/index.ts',
+  request: 'utils/request.ts',
+  socket: 'utils/socket.ts',
+  hudong: 'index.ts',
+};
+
+export default Object.keys(map).reduce((arr, key) => ([
+  ...arr,
+  generateConfig(map[key], key),
+]), []);

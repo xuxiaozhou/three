@@ -1,4 +1,5 @@
 # 互动three
+
 ## 安装
 ```
 npm install hudong-three
@@ -66,7 +67,13 @@ new Draw({
 ```
 
 ## todo list
-- [x] rollup.js 生成定义文件
+- [ ] rollup.js 生成对应文件的类型定义
 - [ ] 3d抽奖
 - [ ] 3d签到墙
 - [ ] demo
+
+## 参考
+```
+http://www.yanhuangxueyuan.com/WebGL/
+http://www.webgl3d.cn/threejs/docs/
+```

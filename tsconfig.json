@@ -4,9 +4,9 @@
     "rootDir": "packages",
     "moduleResolution": "node",
     "module": "ES2015",
-    "declaration": true,
-    "declarationDir": "./lib",
-    "inlineSourceMap": true,
+    //    "declaration": true,
+    //    "declarationDir": "./lib",
+    "inlineSourceMap": false,
     "esModuleInterop": true
     /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     // "strict": true /* Enable all strict type-checking options. */,
