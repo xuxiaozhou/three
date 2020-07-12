@@ -1,14 +1,18 @@
 import {createCanvas} from "../utils/utils";
+import CashManager from "./CashManager";
 
 type IType = 'draw' | 'show'
 
-type IDrawType = 'start' | 'move' | 'end' | 'clear' | 'undo' | 'redo';
+type IActionType = 'start' | 'move' | 'end' | 'clear' | 'undo' | 'redo' | 'setStyle';
 
 type IOnSync = (action: IAction) => void
 
 interface ICtxStyle {
   lineWidth?: number,
   lineColor?: string,
+  shadowBlur?: number,
+  lineCap?: CanvasLineCap,
+  lineJoin?: CanvasLineJoin,
 }
 
 interface IConfig extends ICtxStyle {
@@ -24,8 +28,10 @@ interface IPoint {
 }
 
 interface IAction {
+  type: IActionType,
   point?: IPoint,
-  type: IDrawType,
+  styleAttr?: 'lineColor' | 'lineCap' | 'lineJoin' | 'lineWidth',
+  styleValue?: string | number,
 }
 
 /**
@@ -42,34 +48,57 @@ class Draw {
   private readonly containerHeight: number;
   private readonly type: IType = 'draw';
   public ctx: CanvasRenderingContext2D;
-  private readonly lineWidth: number;
+  private lineWidth: number;
   private readonly onSync: IOnSync | undefined;
-  private readonly lineColor: string;
-  private canvas: HTMLCanvasElement;
-  private cashList: string[] = [];
-  private index: number = -1;
+  private readonly canvas: HTMLCanvasElement;
+  private cashManager: CashManager;
 
   public constructor(config: IConfig) {
-    const {container, type, lineWidth, onSync, lineColor} = config;
+    const {
+      container,
+      type = 'draw',
+      lineWidth = 10,
+      onSync,
+      lineColor = '#fff',
+      shadowBlur = 1,
+      lineCap = 'round',
+      lineJoin = 'round',
+    } = config;
+
     this.containerWidth = container.offsetWidth;
     this.containerHeight = container.offsetHeight;
-    this.type = type || 'draw';
-
-    this.lineColor = lineColor || '#fff';
-    this.lineWidth = lineWidth || 10;
-
+    this.type = type;
+    this.lineWidth = lineWidth;
     this.onSync = onSync;
-    this.initCanvas(container);
+
+    this.canvas = this.initCanvas(container);
+    this.ctx = this.canvas.getContext('2d');
+    this.cashManager = new CashManager(this.canvas);
+
+    this.ctx.lineWidth = this.lineWidth;
+    this.ctx.shadowBlur = shadowBlur;
+    this.ctx.shadowColor = lineColor;
+    this.ctx.strokeStyle = lineColor;
+    this.ctx.lineCap = lineCap;
+    this.ctx.lineJoin = lineJoin;
   }
 
-  private initCanvas(container) {
+  private initCanvas(container): HTMLCanvasElement {
     const canvas = createCanvas('draw', this.containerWidth, this.containerHeight);
 
     if (this.type === 'draw') {
-      const start = this.action.bind(this, 'start');
-      const end = this.action.bind(this, 'end');
+      const start = (e) => {
+        this.handle({
+          type: 'start',
+          point: Draw.getPoint(e)
+        });
+      };
+      const end = this.handle.bind(this, {type: 'end'});
       const move = (e) => {
-        this.action('move', e)
+        this.handle({
+          type: 'move',
+          point: Draw.getPoint(e)
+        });
       };
 
       canvas.addEventListener('touchstart', start);
@@ -79,16 +108,14 @@ class Draw {
       });
       canvas.addEventListener('touchmove', move);
       canvas.addEventListener('touchend', end);
-      canvas.addEventListener('mouseup', e => {
-        end(e);
+      canvas.addEventListener('mouseup', () => {
+        end();
         canvas.removeEventListener('mousemove', move);
       });
     }
 
     container.appendChild(canvas);
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-
+    return canvas;
   }
 
   private static getPoint(e): IPoint {
@@ -105,83 +132,64 @@ class Draw {
     }
   }
 
-  public setCtx(ctxStyle: ICtxStyle = {}) {
-    Object.keys(ctxStyle).forEach(attr => {
-      this.ctx[attr] = ctxStyle[attr];
+  public action(action: IAction) {
+    const {type} = action;
 
-      if (attr === 'lineColor') {
-        this.ctx.strokeStyle = ctxStyle.lineColor;
+    if (type === 'setStyle') {
+      const {styleAttr, styleValue} = action;
+
+      if (styleAttr === 'lineColor') {
+        this.ctx.shadowColor = styleValue.toString();
+        this.ctx.strokeStyle = styleValue.toString();
+        return;
       }
-    })
-  }
 
-  private prepareCtx() {
-    this.ctx.lineWidth = this.lineWidth;
-    this.ctx.shadowBlur = 1;
-    this.ctx.shadowColor = this.lineColor;
-    this.ctx.strokeStyle = this.lineColor;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-  }
+      if (styleAttr === 'lineWidth') {
+        this.ctx[styleAttr] = styleValue as never;
+        this.lineWidth = styleValue as number;
+        return;
+      }
 
-  private record() {
-    this.cashList.push(this.canvas.toDataURL());
-  }
+      this.ctx[styleAttr] = styleValue as never;
 
-  public draw(action: IAction) {
-    const {type, point} = action;
-    this.prepareCtx();
+      return;
+    }
 
     if (type === 'start') {
+      const {point} = action;
       this.ctx.beginPath();
       this.ctx.fill();
       this.ctx.moveTo(point.x - this.lineWidth / 16, point.y - this.lineWidth / 16);
       this.ctx.lineTo(point.x, point.y);
       this.ctx.stroke();
-      this.record();
       return;
     }
 
     if (type === 'move') {
+      const {point} = action;
       this.ctx.lineTo(point.x, point.y);
       this.ctx.stroke();
-      this.record();
       return;
     }
 
     if (type === 'end') {
       this.ctx.closePath();
-      this.record();
       return;
     }
 
     if (type === 'clear') {
-      this.index = -1;
       this.clear();
       return;
     }
 
     // 撤消（回到上一步）
     if (type === 'undo') {
-      if (this.index === -1) {
-        this.index = this.cashList.length;
-      }
-
-      if (this.index === 0) {
-        return;
-      }
-
-      this.index -= 1;
-      this.repaintByCashList();
+      this.cashManager.undo(this.repaint);
     }
 
+    // 重做（往前一步）
     if (type === 'redo') {
-      // 重做（往前一步）
-      if (this.index === this.cashList.length - 1) {
-        return;
-      }
-      this.index += 1;
-      this.repaintByCashList();
+      this.cashManager.redo(this.repaint);
     }
   }
 
@@ -189,27 +197,18 @@ class Draw {
     this.ctx.clearRect(0, 0, this.containerWidth, this.containerHeight);
   }
 
-  private repaintByCashList() {
-    const image = new Image();
-    image.src = this.cashList[this.index];
-    image.onload = () => {
-      this.clear();
-      this.ctx.drawImage(image, 0, 0, image.width, image.height);
-    }
-  }
+  private repaint = (image: CanvasImageSource) => {
+    this.clear();
+    this.ctx.drawImage(image, 0, 0, this.containerWidth, this.containerHeight);
+  };
 
-  private action(type, e?) {
-    const action: IAction = {type};
-
-    if (e) {
-      action.point = Draw.getPoint(e)
-    }
-
+  private handle(action: IAction) {
     if (this.onSync) {
       this.onSync(action);
     }
 
-    this.draw(action);
+    this.action(action);
+    this.cashManager.record();
   }
 
   public getImage() {

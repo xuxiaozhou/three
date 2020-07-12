@@ -8,7 +8,7 @@ const w2 = new Draw({
 new Draw({
   container: document.getElementById('webgl1'),
   onSync(action) {
-    w2.draw(action);
+    w2.action(action);
   }
 });
 

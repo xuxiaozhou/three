@@ -61,7 +61,7 @@ const w2 = new Draw({
 new Draw({
   container: document.getElementById('webgl1'),
   onSync(action) {
-    w2.draw(action);
+    w2.action(action);
   }
 });
 ```
@@ -70,7 +70,11 @@ new Draw({
 - [ ] rollup.js 生成对应文件的类型定义
 - [ ] 3d抽奖
 - [ ] 3d签到墙
-- [ ] demo
+- [ ] 签字
+    - [ ] 上一步，下一步
+    - [ ] 设置样式
+- [ ] demo 案例
+- [ ] docs 文档
 
 ## 参考
 ```
