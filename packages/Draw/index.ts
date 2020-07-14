@@ -1,38 +1,7 @@
 import {createCanvas} from "../utils/utils";
 import CashManager from "./CashManager";
-
-type IType = 'draw' | 'show'
-
-type IActionType = 'start' | 'move' | 'end' | 'clear' | 'undo' | 'redo' | 'setStyle';
-
-type IOnSync = (action: IAction) => void
-
-interface ICtxStyle {
-  lineWidth?: number,
-  lineColor?: string,
-  shadowBlur?: number,
-  lineCap?: CanvasLineCap,
-  lineJoin?: CanvasLineJoin,
-}
-
-interface IConfig extends ICtxStyle {
-  container: HTMLElement,
-  // 可以 draw 画 或者 show 纯展示
-  type: IType,
-  onSync?: IOnSync
-}
-
-interface IPoint {
-  x: number,
-  y: number
-}
-
-interface IAction {
-  type: IActionType,
-  point?: IPoint,
-  styleAttr?: 'lineColor' | 'lineCap' | 'lineJoin' | 'lineWidth',
-  styleValue?: string | number,
-}
+import {IType, IOnSync, IConfig, IAction} from "./interface";
+import {getPoint} from "./utils";
 
 /**
  * todo list
@@ -73,7 +42,7 @@ class Draw {
 
     this.canvas = this.initCanvas(container);
     this.ctx = this.canvas.getContext('2d');
-    this.cashManager = new CashManager(this.canvas);
+    this.cashManager = new CashManager(this.canvas, this.ctx, this.repaint);
 
     this.ctx.lineWidth = this.lineWidth;
     this.ctx.shadowBlur = shadowBlur;
@@ -83,53 +52,52 @@ class Draw {
     this.ctx.lineJoin = lineJoin;
   }
 
+  private prepareDraw(canvas) {
+    const start = e => {
+      this.handle({
+        type: 'start',
+        point: getPoint(e),
+      });
+    };
+    const end = this.handle.bind(this, {type: 'end'});
+    const move = e => {
+      this.handle({
+        type: 'move',
+        point: getPoint(e),
+      });
+    };
+
+    // start
+    canvas.addEventListener('touchstart', start);
+    // move
+    canvas.addEventListener('mousedown', e => {
+      start(e);
+      canvas.addEventListener('mousemove', move);
+    });
+    canvas.addEventListener('touchmove', move);
+
+    // end
+    canvas.addEventListener('touchend', end);
+
+    const pcEnd = () => {
+      canvas.removeEventListener('mousemove', move);
+      end();
+    };
+
+    canvas.addEventListener('mouseup', pcEnd);
+    // out
+    canvas.addEventListener('mouseout', pcEnd);
+  }
+
   private initCanvas(container): HTMLCanvasElement {
     const canvas = createCanvas('draw', this.containerWidth, this.containerHeight);
 
     if (this.type === 'draw') {
-      const start = (e) => {
-        this.handle({
-          type: 'start',
-          point: Draw.getPoint(e)
-        });
-      };
-      const end = this.handle.bind(this, {type: 'end'});
-      const move = (e) => {
-        this.handle({
-          type: 'move',
-          point: Draw.getPoint(e)
-        });
-      };
-
-      canvas.addEventListener('touchstart', start);
-      canvas.addEventListener('mousedown', e => {
-        start(e);
-        canvas.addEventListener('mousemove', move);
-      });
-      canvas.addEventListener('touchmove', move);
-      canvas.addEventListener('touchend', end);
-      canvas.addEventListener('mouseup', () => {
-        end();
-        canvas.removeEventListener('mousemove', move);
-      });
+      this.prepareDraw(canvas);
     }
 
     container.appendChild(canvas);
     return canvas;
-  }
-
-  private static getPoint(e): IPoint {
-    if (e.touches && e.touches.length > 0) {
-      const touch = e.touches[0];
-      const x = touch.clientX;
-      const y = touch.clientY;
-      return {x, y};
-    }
-
-    return {
-      x: e.clientX,
-      y: e.clientY,
-    }
   }
 
   public action(action: IAction) {
@@ -184,12 +152,12 @@ class Draw {
 
     // 撤消（回到上一步）
     if (type === 'undo') {
-      this.cashManager.undo(this.repaint);
+      this.cashManager.undo();
     }
 
     // 重做（往前一步）
     if (type === 'redo') {
-      this.cashManager.redo(this.repaint);
+      this.cashManager.redo();
     }
   }
 
@@ -207,8 +175,8 @@ class Draw {
       this.onSync(action);
     }
 
+    this.cashManager.addRecord();
     this.action(action);
-    this.cashManager.record();
   }
 
   public getImage() {

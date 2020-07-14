@@ -1,15 +1,27 @@
 import { Draw } from '../packages';
 
-const w2 = new Draw({
+const d2 = new Draw({
   container: document.getElementById('webgl2'),
   type: 'show'
 });
 
-new Draw({
+const d1 = new Draw({
   container: document.getElementById('webgl1'),
   onSync(action) {
-    w2.action(action);
+    d2.action(action);
   }
 });
+
+window.undo = () => {
+  d1.action({
+    type: 'undo',
+  });
+};
+
+window.redo = () => {
+  d1.action({
+    type: 'redo',
+  });
+};
 
 
