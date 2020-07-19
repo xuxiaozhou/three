@@ -1,4 +1,4 @@
-import { Draw } from '../packages';
+import Draw from '../packages/Draw';
 
 const d2 = new Draw({
   container: document.getElementById('webgl2'),

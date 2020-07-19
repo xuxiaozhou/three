@@ -1,4 +1,4 @@
-import { Sign3D } from '../packages';
+import Sign3D from '../packages/Sign3D';
 
 new Sign3D({
   container: document.getElementById('webgl'),

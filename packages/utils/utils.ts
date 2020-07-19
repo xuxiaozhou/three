@@ -4,7 +4,7 @@ export function createId(pre: string = '') {
   }
 
   function guid() {
-    return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
+    return S4() + S4()
   }
 
   return pre + guid()

@@ -2,7 +2,7 @@ export type IPosition = [number, number]
 
 export interface ISpriteConfig {
   content?: string,
-  avatar?: string,
+  avatar?: string | CanvasImageSource,
   position?: IPosition,
   imageSize?: number,
   type?: 'text' | 'image',
@@ -12,6 +12,7 @@ export interface ISpriteConfig {
   padding?: [number, number, number, number],
   radius?: number,
   avatarSize?: number,
+  image?: string | CanvasImageSource
 }
 
 export type IType = 'scroll' | 'reversescroll'
@@ -28,18 +29,17 @@ export interface IGlobalConfig extends ICalcGlobalConfig {
   ctx?: CanvasRenderingContext2D,
   templateCtx?: CanvasRenderingContext2D,
   templateCanvas?: HTMLCanvasElement,
+  templateSpriteCanvas?: HTMLCanvasElement;
   canvas?: HTMLCanvasElement,
-}
-
-export interface IAnimationData {
-  position: IPosition,
-  speed: IPosition,
-  rangeWidth: IPosition | undefined
 }
 
 export type AvatarImage = string | CanvasImageSource;
 
-export interface IDrawOptions {
-  avatarImage: AvatarImage,
-  size: IPosition
+export interface ISize {
+  width: number,
+  height: number
+}
+
+export interface IDrawOptions extends ISize {
+  avatar?: AvatarImage,
 }

@@ -6,7 +6,26 @@ npm install hudong-three
 yarn add hudong-three
 ```
 
-## 弹幕
+## todo list
+- [ ] rollup.js 生成对应文件的类型定义
+- [ ] 3d抽奖
+- [ ] 3d签到墙
+- [ ] 签字
+    - [ ] 上一步，下一步
+    - [ ] 设置样式
+- [ ] 弹幕
+    - [ ] 不同尺寸不同速度的出发
+- [ ] demo 案例
+- [ ] docs 文档
+
+## 参考
+```
+http://www.yanhuangxueyuan.com/WebGL/
+http://www.webgl3d.cn/threejs/docs/
+```
+
+## 用法
+### 弹幕
 ```javascript
 import {Barrage} from 'hudong-three';
 
@@ -31,8 +50,8 @@ barrage.add({
 })
 ```
 
-### 弹幕配置项
-#### globalConfig 全局配置
+#### 弹幕配置项
+##### globalConfig 全局配置
 
 ```javascript
 {
@@ -48,7 +67,7 @@ barrage.add({
 }
 ```
 
-## 手绘板
+### 手绘板
 ```javascript
 import {Draw} from 'hudong-three';
 // 纯展示
@@ -64,20 +83,4 @@ new Draw({
     w2.action(action);
   }
 });
-```
-
-## todo list
-- [ ] rollup.js 生成对应文件的类型定义
-- [ ] 3d抽奖
-- [ ] 3d签到墙
-- [ ] 签字
-    - [ ] 上一步，下一步
-    - [ ] 设置样式
-- [ ] demo 案例
-- [ ] docs 文档
-
-## 参考
-```
-http://www.yanhuangxueyuan.com/WebGL/
-http://www.webgl3d.cn/threejs/docs/
 ```

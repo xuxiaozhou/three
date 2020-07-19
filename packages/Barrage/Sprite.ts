@@ -1,117 +1,122 @@
-import {IAnimationData, IGlobalConfig, ISpriteConfig, AvatarImage, IDrawOptions,} from "./interface";
-import loadImage from "./utils/loadImage";
+import {AvatarImage, IDrawOptions, IGlobalConfig, ISpriteConfig,} from "./interface";
 import DrawManager from "./utils/DrawManager";
-import {createCanvas, createId} from "../utils/utils";
+import {createId} from "../utils/utils";
+import loadImage from "./utils/loadImage";
 
-const employTrackSpaceX = 20;
+// const employTrackSpaceX = 20;
 
 class Sprite {
   public id: string;
   public status: boolean = true;
-  private position: [number, number] = null;
+  private positionX: number;
+  private positionY: number;
+  private speedX: number;
+  private readonly width: number;
+  public readonly height: number;
 
-  private speed: [number, number] = [1, 1];
-  // 精灵大小
-  public size: [number, number];
-  // 运动范围
-  private rangeWidth?: [number, number];
+  private avatar?: AvatarImage;
 
-  private templateCtx: CanvasRenderingContext2D;
-  private avatarImage?: AvatarImage;
-
-  private readonly templateCanvas: HTMLCanvasElement;
   private readonly drawManager: DrawManager;
 
-  // 占用起飞跑道标志
-  public employTrack = false;
-
-  private spriteConfig: ISpriteConfig;
   private globalConfig: IGlobalConfig;
+
+  private image: CanvasImageSource;
+  private rangeWidthMin: number;
+  private rangeWidthMax: number;
 
   public constructor(spriteConfig: ISpriteConfig, globalConfig: IGlobalConfig) {
     this.id = createId('s-');
 
-    this.spriteConfig = spriteConfig;
     this.globalConfig = globalConfig;
+
     this.drawManager = new DrawManager(spriteConfig, globalConfig);
-    this.size = this.drawManager.calcSize();
-    this.templateCanvas = createCanvas(this.id, this.size[0], this.size[1]);
+    const {width, height} = this.drawManager.calcSize();
+    this.width = width;
+    this.height = height;
 
-    if (this.spriteConfig.avatar) {
-      loadImage(this.spriteConfig.avatar, avatarImage => {
-        this.avatarImage = avatarImage;
-        this.getImageData();
-      });
-    }
+    this.globalConfig.templateSpriteCanvas.width = width;
+    this.globalConfig.templateSpriteCanvas.height = height;
+    const templateCtx = this.globalConfig.templateSpriteCanvas.getContext('2d');
+    templateCtx.clearRect(0, 0, width, height);
 
-    this.getImageData();
+    this.drawManager.draw(templateCtx, {
+      avatar: this.avatar,
+      width: this.width,
+      height: this.height,
+    } as IDrawOptions);
+    const imageUrl = this.globalConfig.templateSpriteCanvas.toDataURL();
+
+    loadImage(imageUrl).then(image => {
+      this.image = image;
+    });
+
+    this.prepareData();
   }
 
-  private getImageData = () => {
-    this.templateCtx = this.templateCanvas.getContext('2d');
-    this.templateCtx.clearRect(0, 0, this.size[0], this.size[1]);
-    this.drawManager.draw(this.templateCtx, {
-      avatarImage: this.avatarImage,
-      size: this.size
-    } as IDrawOptions);
-  };
+  private prepareData() {
+    if (this.globalConfig.type === 'reversescroll') {
+      this.speedX = (this.globalConfig.containerWidth + this.width) / this.globalConfig.lifeTime
+      this.positionX = -this.width;
+      this.rangeWidthMin = -this.width;
+      this.rangeWidthMax = this.globalConfig.containerWidth + this.width
+    }
+
+    // scroll
+    this.speedX = -(this.globalConfig.containerWidth + this.width) / this.globalConfig.lifeTime;
+    this.positionX = this.globalConfig.containerWidth;
+    this.rangeWidthMin = -this.width;
+    this.rangeWidthMax = this.globalConfig.containerWidth;
+  }
 
   public render(ctx) {
-    ctx.drawImage(
-      this.templateCanvas,
-      ...this.position
-    )
+    if (this.image) {
+      ctx.drawImage(
+        this.image,
+        this.positionX,
+        this.positionY,
+      )
+    }
   }
 
   // 设置关于运动的参数
-  public setAnimation({position, speed, rangeWidth}: IAnimationData) {
-    this.position = position;
-    this.speed = speed;
-    this.rangeWidth = rangeWidth;
+  public setAnimation(positionY: number) {
+    this.positionY = positionY;
   }
 
-  private checkEmployTrack(left) {
-    if (this.globalConfig.type === 'reversescroll') {
-      if (left > employTrackSpaceX) {
-        return false;
-      }
-    }
-
-    if (this.globalConfig.type === 'scroll') {
-      const [width] = this.size;
-      if (left < this.globalConfig.containerWidth - width - employTrackSpaceX) {
-        return false;
-      }
-    }
-
-    return true
-  }
+  // private checkEmployTrack(left) {
+  //   if (this.globalConfig.type === 'reversescroll') {
+  //     if (left > employTrackSpaceX) {
+  //       return false;
+  //     }
+  //   }
+  //
+  //   if (this.globalConfig.type === 'scroll') {
+  //     const [width] = this.size;
+  //     if (left < this.globalConfig.containerWidth - width - employTrackSpaceX) {
+  //       return false;
+  //     }
+  //   }
+  //
+  //   return true
+  // }
 
   public animation() {
-    if (!this.position) {
+    if (!this.positionY || !this.speedX) {
       return;
     }
 
-    const left = this.position[0] + this.speed[0];
-    const top = this.position[1] + this.speed[1];
+    this.positionX += this.speedX;
 
-    const offsetWidth = (
-      this.rangeWidth &&
+    const overflowScreen = (
+      this.rangeWidthMax && this.rangeWidthMin &&
       (
-        this.rangeWidth[0] > left ||
-        this.rangeWidth[1] < left
+        this.rangeWidthMin > this.positionX ||
+        this.rangeWidthMax < this.positionX
       )
     );
 
-    if (offsetWidth) {
+    if (overflowScreen) {
       this.status = false;
-      return;
-    }
-
-    this.position = [left, top];
-
-    if (this.employTrack) {
-      this.employTrack = this.checkEmployTrack(left);
     }
   }
 

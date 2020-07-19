@@ -3,6 +3,7 @@ import Sprite from "./Sprite";
 import {IGlobalConfig, ISpriteConfig, ICalcGlobalConfig} from "./interface";
 import {getRandomColor, mixConfig} from "./utils/utils";
 import {createCanvas} from "../utils/utils";
+import loadImage from "./utils/loadImage";
 
 const screenSpace = 32;
 
@@ -18,6 +19,7 @@ const defaultSpriteConfig: ISpriteConfig = {
   type: 'text',
   padding: [12, 12, 12, 12],
   radius: 20,
+  imageSize: 80,
 };
 
 class Barrage {
@@ -35,6 +37,7 @@ class Barrage {
     this.container = container;
     this.globalConfig.canvas = this.initCanvas(true);
     this.globalConfig.templateCanvas = this.initCanvas();
+    this.globalConfig.templateSpriteCanvas = this.initCanvas();
     this.globalConfig.templateCtx = this.globalConfig.templateCanvas.getContext('2d');
     this.globalConfig.ctx = this.globalConfig.canvas.getContext('2d');
     this.globalConfig = {
@@ -52,12 +55,27 @@ class Barrage {
     window.addEventListener('resize', this.resize);
   }
 
-  public add(spriteConfig: ISpriteConfig) {
+  public async add(spriteConfig: ISpriteConfig) {
     spriteConfig = mixConfig(spriteConfig, defaultSpriteConfig);
     if (!spriteConfig.fontColor) {
       spriteConfig.fontColor = getRandomColor();
     }
 
+    try {
+      if (spriteConfig.avatar && typeof spriteConfig.avatar === 'string') {
+        spriteConfig.avatar = await loadImage(spriteConfig.avatar)
+      }
+    } catch (e) {
+    }
+
+    try {
+      if (spriteConfig.image && typeof spriteConfig.image === 'string') {
+        spriteConfig.image = await loadImage(spriteConfig.image)
+      }
+    } catch (e) {
+    }
+
+    // 预加载图片
     this.scene.add(
       new Sprite(
         spriteConfig,

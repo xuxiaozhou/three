@@ -1,6 +1,6 @@
 import Sprite from "./Sprite";
-import {IGlobalConfig, IAnimationData} from "./interface";
-import TrackManager from "./utils/TrackManager";
+import {IGlobalConfig} from "./interface";
+import TrackManager from "./TrackManager";
 
 class Scene {
   private globalConfig: IGlobalConfig;
@@ -20,34 +20,8 @@ class Scene {
     this.start();
   }
 
-  private calcAnimation(rect, top = 12): IAnimationData {
-    const [barrageWidth] = rect;
-
-    if (this.globalConfig.type === 'reversescroll') {
-      const speedX = (this.globalConfig.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
-      return {
-        position: [-barrageWidth, top],
-        speed: [speedX, 0],
-        rangeWidth: [-barrageWidth, this.globalConfig.containerWidth + barrageWidth]
-      }
-    }
-
-    // scroll
-    const speedX = -(this.globalConfig.containerWidth + barrageWidth) / this.globalConfig.lifeTime;
-    return {
-      position: [this.globalConfig.containerWidth, top],
-      speed: [speedX, 0],
-      rangeWidth: [-barrageWidth, this.globalConfig.containerWidth],
-    };
-  }
-
   public add(sprite: Sprite) {
     this.needAddSpriteList.push(sprite);
-  }
-
-  private addSprite(sprite: Sprite, top: number) {
-    sprite.setAnimation(this.calcAnimation(sprite.size, top));
-    this.spriteInstances[sprite.id] = sprite;
   }
 
   private tryToAddSprite() {
@@ -56,10 +30,11 @@ class Scene {
     }
 
     const [sprite] = this.needAddSpriteList;
-    const top = this.trackManger.applyPosition(sprite);
+    const positionY = this.trackManger.applyPosition(sprite);
 
-    if (top) {
-      this.addSprite(sprite, top);
+    if (positionY) {
+      sprite.setAnimation(positionY);
+      this.spriteInstances[sprite.id] = sprite;
       this.needAddSpriteList.shift();
     }
   }
@@ -95,27 +70,27 @@ class Scene {
 
   private run = () => {
     this.tryToAddSprite();
+
     this.render();
+
     this.timer = window.requestAnimationFrame(this.run);
   };
 
   private drawTemplateCanvas() {
-    this.globalConfig.templateCtx.clearRect(0, 0, this.globalConfig.containerWidth, this.globalConfig.containerHeight);
+    this.globalConfig.templateCtx.clearRect(
+      0, 0,
+      this.globalConfig.containerWidth, this.globalConfig.containerHeight,
+    );
 
     Object.keys(this.spriteInstances).forEach(uid => {
-      try {
-        const sprite = this.spriteInstances[uid];
+      const sprite = this.spriteInstances[uid];
 
-        sprite.animation();
+      sprite.animation();
 
-        this.trackManger.removeEmployWithNotEmploy(sprite);
-
-        if (!sprite.status) {
-          delete this.spriteInstances[uid];
-        } else {
-          sprite.render(this.globalConfig.templateCtx);
-        }
-      } catch (e) {
+      if (!sprite.status) {
+        delete this.spriteInstances[uid];
+      } else {
+        sprite.render(this.globalConfig.templateCtx);
       }
     });
   }
@@ -123,7 +98,10 @@ class Scene {
   private render() {
     this.drawTemplateCanvas();
 
-    this.globalConfig.ctx.clearRect(0, 0, this.globalConfig.containerWidth, this.globalConfig.containerHeight);
+    this.globalConfig.ctx.clearRect(
+      0, 0,
+      this.globalConfig.containerWidth, this.globalConfig.containerHeight,
+    );
     this.globalConfig.ctx.drawImage(
       this.globalConfig.templateCanvas,
       0, 0,

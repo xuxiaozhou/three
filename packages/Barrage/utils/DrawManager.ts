@@ -1,4 +1,4 @@
-import {IDrawOptions, IGlobalConfig, ISpriteConfig} from "../interface";
+import {IDrawOptions, IGlobalConfig, ISpriteConfig, ISize} from "../interface";
 
 export interface IRoundImageArgs {
   img: CanvasImageSource,
@@ -19,36 +19,44 @@ class DrawManager {
     this.spriteConfig = spriteConfig;
   }
 
-  public calcSize(): [number, number] {
+  public calcSize(): ISize {
     const [paddingTop, paddingRight, paddingBottom, paddingLeft] = this.spriteConfig.padding;
-    this.globalConfig.ctx.save();
-    this.globalConfig.ctx.font = `${this.spriteConfig.fontSize}px ${this.spriteConfig.fontFamily}`;
-    const measureText = this.globalConfig.ctx.measureText(this.spriteConfig.content);
-    this.globalConfig.ctx.restore();
 
-    const barrageAllWidth = (
-      this.spriteConfig.avatarSize + imageAndTextSpace + measureText.width +
+    let barrageAllWidth = (
+      this.spriteConfig.avatarSize + imageAndTextSpace +
       paddingLeft + paddingRight
     );
 
-    const barrageAllHeight = (
-      Math.max(this.spriteConfig.avatarSize, this.spriteConfig.fontSize) +
-      paddingTop + paddingBottom
-    );
+    let barrageAllHeight = paddingTop + paddingBottom;
 
-    return [Math.floor(barrageAllWidth), barrageAllHeight];
+    if (this.spriteConfig.type === 'text') {
+      this.globalConfig.ctx.save();
+      this.globalConfig.ctx.font = `${this.spriteConfig.fontSize}px ${this.spriteConfig.fontFamily}`;
+      const measureText = this.globalConfig.ctx.measureText(this.spriteConfig.content);
+      this.globalConfig.ctx.restore();
+      barrageAllWidth += measureText.width;
+      barrageAllHeight += Math.max(this.spriteConfig.avatarSize, this.spriteConfig.fontSize);
+    } else {
+      barrageAllWidth += this.spriteConfig.imageSize;
+      barrageAllHeight += Math.max(this.spriteConfig.avatarSize, this.spriteConfig.imageSize);
+    }
+
+    return {
+      width: Math.floor(barrageAllWidth),
+      height: barrageAllHeight
+    };
   }
 
   public draw(ctx: CanvasRenderingContext2D, options: IDrawOptions) {
     const [, , left] = this.spriteConfig.padding;
 
     // 头像
-    const avatarSpaceTop = (options.size[1] - this.spriteConfig.avatarSize) / 2;
-    if (options.avatarImage && typeof options.avatarImage !== 'string') {
+    const avatarSpaceTop = (options.height - this.spriteConfig.avatarSize) / 2;
+    if (options.avatar && typeof options.avatar !== 'string') {
       DrawManager.drawAvatar(
         ctx,
         {
-          img: options.avatarImage,
+          img: options.avatar,
           position: [left, avatarSpaceTop],
           imageHeight: this.spriteConfig.avatarSize,
           imageWidth: this.spriteConfig.avatarSize,
@@ -59,17 +67,18 @@ class DrawManager {
       // todo 留出位置
     }
 
-    const textSpaceTop = (options.size[1] - this.spriteConfig.fontSize - 5) / 2;
-    this.drawText(ctx, {
-      left: this.spriteConfig.avatarSize + imageAndTextSpace + left,
-      top: textSpaceTop
-    });
+    if (this.spriteConfig.type === 'text') {
+      const textSpaceTop = (options.height - this.spriteConfig.fontSize - 5) / 2;
+      this.drawText(ctx, {
+        left: this.spriteConfig.avatarSize + imageAndTextSpace + left,
+        top: textSpaceTop
+      });
+    }
 
     DrawManager.drawBorder(ctx, options);
   }
 
   private static drawBorder(ctx: CanvasRenderingContext2D, options: IDrawOptions) {
-    const [barrageAllWidth, barrageAllHeight] = options.size;
     //x轴方向的阴影偏移量,负数为向右偏移量
     ctx.shadowOffsetX = 3;
     //y轴方向的阴影偏移量,负数为向上偏移量
@@ -80,8 +89,8 @@ class DrawManager {
     ctx.strokeStyle = 'rgba(46, 141, 239, 1)';
     ctx.strokeRect(
       0, 0,
-      barrageAllWidth,
-      barrageAllHeight,
+      options.width,
+      options.height,
     );
   }
 

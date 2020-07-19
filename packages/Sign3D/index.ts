@@ -1,25 +1,33 @@
 import {
   PerspectiveCamera,
   WebGLRenderer,
-  BoxGeometry,
-  Mesh, Scene, MeshBasicMaterial,
+  Scene,
+  Group,
 } from "three";
-
-interface IConfig {
-  container: HTMLElement,
-  backgroundImage: string,
-}
+import {mixConfig} from "../Barrage/utils/utils";
+import MeshManager from "./MeshManager";
+import {IConfig} from "./interface";
 
 class Sign3D {
-  private config: IConfig;
+  private readonly config: IConfig;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
-  private scene: Scene;
-  private cube: Mesh<BoxGeometry, MeshBasicMaterial>;
+  private readonly scene: Scene;
   private timer: number;
+  private readonly group: Group;
+  private objects: any[];
+  private meshManager: MeshManager;
 
   public constructor(config: IConfig) {
-    this.config = config;
+    this.config = mixConfig(config, {
+      shape: 'Circle',
+    });
+
+    this.meshManager = new MeshManager(this.config);
+    // 场景
+    this.scene = new Scene();
+    this.group = new Group();
+    this.objects = [];
 
     this.prepareRender();
 
@@ -37,31 +45,30 @@ class Sign3D {
     window.removeEventListener('resize', this.resize)
   }
 
-  private add() {
-    const geometry = new BoxGeometry();
-    const material = new MeshBasicMaterial({color: 0x00ff00});
-    this.cube = new Mesh(geometry, material);
-    this.scene.add(this.cube);
+  private async add() {
+    for (let i = 0; i < 2048; i += 1) {
+      const object = await this.meshManager.createMesh();
+      this.group.add(object);
+      this.objects.push(object)
+    }
+    this.scene.add(this.group)
   }
 
   private render = () => {
     this.timer = window.requestAnimationFrame(this.render);
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
     this.renderer.render(this.scene, this.camera);
   };
 
   private prepareRender() {
     this.config.container.style.backgroundImage = `url(${this.config.backgroundImage})`;
-    // 场景
-    this.scene = new Scene();
+
     // 摄像机
     this.camera = new PerspectiveCamera(
       40,
       // 窗口宽高比
       window.innerWidth / window.innerHeight,
-      0.1,
-      1000
+      20,
+      10000
     );
     this.camera.position.z = 30;
     // 渲染器
