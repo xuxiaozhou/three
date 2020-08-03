@@ -1,6 +1,15 @@
-export {default as Grid} from './Grid';
-export {default as Sphere} from './Sphere';
+import Grid from './Grid';
+import Sphere from './Sphere';
+import Logo from './Logo';
+import Helix from './Helix';
+import Artascope from './Artascope';
+
+export const animates = {
+  Grid,
+  Sphere,
+  Logo,
+  Helix,
+  Artascope,
+};
+
 export {default as Fadeout} from './Fadeout';
-export {default as Logo} from './Logo';
-export {default as Helix} from './Helix';
-export {default as Artascope} from './Artascope';

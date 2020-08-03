@@ -1,25 +1,25 @@
-import Base from './Base'
-import { Object3D } from 'three'
+import {Object3D, Group, Camera} from 'three'
+import {IOptions} from "../interface";
 
-export default class Fadeout extends Base {
+export default class Fadeout {
+  private group: Group;
+  private camera: Camera;
+  public objs: Object3D[];
 
-  constructor (options) {
-    super(options)
+  constructor(options: IOptions) {
+    this.group = options.group;
+    this.camera = options.camera;
 
-    let objs = []
+    const objs = [];
     for (let i = 0; i < options.Cont; i++) {
-      let object = new Object3D()
-
-      // object.position.x = 0		// 向左飞出
-      // object.position.y = 0
-      object.position.z = 30000
+      const object = new Object3D();
+      object.position.z = 30000;
 
       objs.push(object)
     }
-    this.camera.position.set(0, 0, 3000)
-    this.camera.lookAt(this.group.position)
+    this.camera.position.set(0, 0, 3000);
+    this.camera.lookAt(this.group.position);
     this.objs = objs
   }
-
 }
 

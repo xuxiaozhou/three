@@ -1,10 +1,7 @@
-import Base from './Base';
-import { Vector3, Object3D } from 'three';
+import {Vector3, Object3D} from 'three';
 
-export default class Artascope extends Base {
+export default class Artascope {
   constructor(options) {
-    super(options);
-
     let vector = new Vector3();
     let objs = [];
     let radius = 200;
@@ -40,7 +37,7 @@ export default class Artascope extends Base {
       .onUpdate(function (data) {
         group.rotation.z -= 0.001 * rotationSpeed;
       })
-      .to({ z: 500 }, Time)
+      .to({z: 500}, Time)
       .yoyo(true)
       .repeat(Infinity)
       .start();

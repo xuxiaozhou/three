@@ -1,4 +1,13 @@
-import {CircleGeometry, DoubleSide, Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader} from "three";
+import {
+  CircleGeometry,
+  DoubleSide, Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  PlaneGeometry,
+  SphereBufferGeometry,
+  Texture,
+  TextureLoader
+} from "three";
 import {IConfig} from "./interface";
 
 // 每个头像大小
@@ -9,6 +18,20 @@ class MeshManager {
 
   public constructor(config: IConfig) {
     this.config = config
+  }
+
+  public async createSky(backgroundImage) {
+    const texture = await this.getTexture(backgroundImage);
+    const material = new MeshBasicMaterial({map: texture});
+
+    const SkyBoxSize = 4000;
+    const skyBox = new Mesh(
+      new SphereBufferGeometry(SkyBoxSize, 0, 0),
+      material
+    );
+    skyBox.applyMatrix4(new Matrix4().makeScale(1, 1, -1));
+    return skyBox;
+
   }
 
   public async createMesh(position = null) {
