@@ -1,4 +1,4 @@
-import {createCanvas} from "./utils";
+import {createCanvas} from "../utils/utils";
 import CashManager from "./CashManager";
 import {IType, IOnSync, IConfig, IAction} from "./interface";
 import {getPoint} from "./utils";

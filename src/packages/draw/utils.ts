@@ -24,12 +24,3 @@ export const loadImage = (src: string, callback: (image: HTMLImageElement | fals
     callback(false);
   }
 };
-
-export const createCanvas = (id: string, containerWidth: number, containerHeight: number): HTMLCanvasElement => {
-  const element = window.document.createElement('canvas');
-  element.id = id;
-  element.width = containerWidth;
-  element.height = containerHeight;
-
-  return element;
-};

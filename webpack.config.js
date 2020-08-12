@@ -11,6 +11,7 @@ module.exports = {
     sign3d: './src/sign3d.ts',
     danmu: './src/danmu.ts',
     draw: './src/draw.ts',
+    barrage: './src/barrage.ts',
     lottery3d: './src/lottery3d.ts'
   },
   output: {
@@ -56,6 +57,11 @@ module.exports = {
       template: 'template/draw.html',
       filename: 'draw.html',
       chunks: ['draw']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'template/template.html',
+      filename: 'barrage.html',
+      chunks: ['barrage']
     })
   ],
   devtool: 'source-map'

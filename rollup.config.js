@@ -5,7 +5,7 @@ import pkg from './package.json'
 
 export default [
   {
-    input: 'src/package/index.ts',
+    input: 'src/packages/index.ts',
     external: ['lodash', 'three', '@tweenjs/tween.js'],
     output: [
       { file: pkg.main, format: 'cjs' }
@@ -13,7 +13,7 @@ export default [
     plugins: [
       commonjs({
         namedExports: {
-          './src/package/utils/postprocessing': [
+          './src/packages/utils/postprocessing': [
             'EffectComposer', 'RenderPass',
             'GodRaysPass', 'KernelSize',
             'ClearMaskPass',
