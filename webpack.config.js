@@ -53,7 +53,7 @@ module.exports = {
       chunks: ['danmu']
     }),
     new HtmlWebpackPlugin({
-      template: 'template/template.html',
+      template: 'template/draw.html',
       filename: 'draw.html',
       chunks: ['draw']
     })
