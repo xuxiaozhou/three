@@ -1,4 +1,4 @@
-import {Lottery3d} from "./package";
+import {Lottery3d} from "./packages";
 
 function init() {
   // @ts-ignore
