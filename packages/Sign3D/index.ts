@@ -4,7 +4,6 @@ import {
   Scene,
   Group,
 } from "three";
-// import TWEEN from '@tweenjs/tween.js'
 import {mixConfig} from "../Barrage/utils/utils";
 import MeshManager from "./MeshManager";
 import {IConfig, IOptions} from "./interface";
@@ -20,6 +19,7 @@ class Sign3D {
   private readonly group: Group;
   private objects: any[];
   private meshManager: MeshManager;
+
   private animates: { fadeout: Fadeout; enabled: any[] };
 
   public constructor(config: IConfig) {
@@ -94,17 +94,16 @@ class Sign3D {
 
   private prepareAnimate() {
     const options: IOptions = {
-      Cont: 2048,
+      count: 2048,
       group: this.group,
       camera: this.camera,
+      rotationSpeed: 3
     };
     this.animates = {
       enabled: [],
-      // fadeout
       fadeout: new Fadeout(options)
     };
     for (let animate of this.config.animates) {
-      // options.sign3dConfig = animate;
       const Animate = animates[animate];
       this.animates.enabled.push(
         new Animate(options)

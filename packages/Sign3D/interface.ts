@@ -10,8 +10,11 @@ export interface IConfig {
   animates?: IAnimate[],
 }
 
+
 export interface IOptions {
-  Cont: number,
+  count: number,
   group: Group,
   camera: Camera,
+  rotationSpeed: number,
+  tableData?: Array<[number, number]>
 }

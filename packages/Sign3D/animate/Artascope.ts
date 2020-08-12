@@ -1,13 +1,27 @@
-import {Vector3, Object3D} from 'three';
+import {Vector3, Object3D, Group, Camera} from 'three';
+import {IOptions} from "../interface";
+
+const radius = 200;
+const everyNum = 25;
 
 export default class Artascope {
-  constructor(options) {
-    let vector = new Vector3();
+  // 元素个数
+  private count: number = 2048;
+  private group: Group;
+  private readonly camera: Camera;
+  private rotationSpeed: number;
+
+  public objs: Object3D[];
+
+  public constructor(options: IOptions) {
+    this.group = options.group;
+    this.camera = options.camera;
+    this.rotationSpeed = options.rotationSpeed;
+
+    const vector = new Vector3();
     let objs = [];
-    let radius = 200;
-    let everyNum = 25;
-    for (let i = 0; i < this.Cont; i++) {
-      let e = parseInt(i / everyNum);
+    for (let i = 0; i < this.count; i++) {
+      let e = parseInt(`${i / everyNum}`);
       let phi = Math.PI * (2 / everyNum) * (i % everyNum);
       let object = new Object3D();
 
@@ -26,16 +40,13 @@ export default class Artascope {
     this.objs = objs;
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     let Time = 10000;
-    let rotationSpeed = this.sign3DConfig.rotationSpeed; // 旋转速度
-    let group = this.group;
-    let camera = this.camera;
 
-    new TWEEN.Tween(camera.position)
+    new TWEEN.Tween(this.camera.position)
       .easing(TWEEN.Easing.Quartic.InOut)
-      .onUpdate(function (data) {
-        group.rotation.z -= 0.001 * rotationSpeed;
+      .onUpdate(() => {
+        this.group.rotation.z -= 0.001 * this.rotationSpeed;
       })
       .to({z: 500}, Time)
       .yoyo(true)

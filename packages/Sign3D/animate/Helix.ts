@@ -1,11 +1,18 @@
-import Base from './Base'
-import {Vector3, Object3D} from 'three'
+import {Vector3, Object3D, Camera, Group} from 'three'
+import {IOptions} from "../interface";
+import {randomNum} from './utils';
 
-export default class Helix extends Base {
+export default class Helix {
+  public objs: Object3D[];
 
-  constructor(options) {
-    super(options);
+  private readonly rotationSpeed: number;
+  private readonly group: Group;
+  private readonly camera: Camera;
 
+  public constructor(options: IOptions) {
+    this.rotationSpeed = options.rotationSpeed;
+    this.group = options.group;
+    this.camera = options.camera;
     let vector = new Vector3();
     let objs = [];
     for (let i = 0; i < 1000; i++) {
@@ -29,45 +36,26 @@ export default class Helix extends Base {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     let Time = 5000;
-    let rotationSpeed = this.sign3DConfig.rotationSpeed; // 旋转速度
+    let rotationSpeed = this.rotationSpeed; // 旋转速度
     let camera = this.camera;
     let group = this.group;
 
-    let rand = function () {
-      //生成从minNum到maxNum的随机数
-      function randomNum(minNum, maxNum) {
-        switch (arguments.length) {
-          case 1:
-            return parseInt(Math.random() * minNum + 1, 10);
-            break;
-          case 2:
-            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-            break;
-          default:
-            return 0;
-            break
-        }
-      }
-
-      // 随机位置的最大值
-      let raio = 1500;
-      return {
+    let tween = function () {
+      const raio = 1500;
+      const randomPostion = {
         z: randomNum(-raio, raio),
         x: randomNum(-raio, raio),
         // y: randomNum(-raio, raio)
-      }
-    };
-
-    let tween = function () {
+      };
       new TWEEN.Tween(camera.position)
         .onComplete(tween)
         .easing(TWEEN.Easing.Back.InOut)
-        .onUpdate(function (data) {
-          camera.lookAt({...group.position, ...{y: 0}})
+        .onUpdate(() => {
+          camera.lookAt({...group.position, y: 0} as Vector3)
         })
-        .to(rand(), Time)
+        .to(randomPostion, Time)
         .start()
     };
     new TWEEN.Tween(group.position)

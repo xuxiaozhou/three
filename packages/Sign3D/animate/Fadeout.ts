@@ -6,12 +6,12 @@ export default class Fadeout {
   private camera: Camera;
   public objs: Object3D[];
 
-  constructor(options: IOptions) {
+  public constructor(options: IOptions) {
     this.group = options.group;
     this.camera = options.camera;
 
     const objs = [];
-    for (let i = 0; i < options.Cont; i++) {
+    for (let i = 0; i < options.count; i++) {
       const object = new Object3D();
       object.position.z = 30000;
 

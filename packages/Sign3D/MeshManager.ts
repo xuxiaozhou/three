@@ -1,6 +1,7 @@
 import {
   CircleGeometry,
-  DoubleSide, Matrix4,
+  DoubleSide,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   PlaneGeometry,
@@ -65,7 +66,11 @@ class MeshManager {
 
   public getTexture(url): Promise<Texture> {
     return new Promise(async (resolve, reject) => {
-      new TextureLoader().load(url, texture => {
+      const loader = new TextureLoader();
+      loader.crossOrigin = '';
+      // loader.setCrossOrigin("anonymous");
+
+      loader.load(url, texture => {
           resolve(texture)
         }, () => {
         }, () => {

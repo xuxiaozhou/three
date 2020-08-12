@@ -1,16 +1,20 @@
-import {Object3D} from 'three'
+import {Object3D, Group, Camera} from 'three'
+import {IOptions} from "../interface";
+import {randomNum} from "./utils";
 
 export default class Grid {
-  private Cont = 1000;
+  private readonly group: Group;
+  private readonly camera: Camera;
 
-  constructor(options) {
+  public objs: Object3D[];
+
+  constructor(options: IOptions) {
     let objs = [];
 
     this.group = options.group;
     this.camera = options.camera;
-    this.sign3DConfig = options.sign3dConfig;
 
-    for (let i = 0; i < this.Cont; i++) {
+    for (let i = 0; i < options.count; i++) {
       let object = new Object3D();
       let offset = 180;
       let colmn = 8;
@@ -23,45 +27,27 @@ export default class Grid {
     this.objs = objs
   }
 
-  tween(TWEEN) {
+  public tween(TWEEN) {
     let Time = 5000;
     let camera = this.camera;
     let group = this.group;
 
-    let rand = function () {
-      //生成从minNum到maxNum的随机数
-      function randomNum(minNum, maxNum) {
-        switch (arguments.length) {
-          case 1:
-            return parseInt(String(Math.random() * minNum + 1), 10);
-            break;
-          case 2:
-            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-            break;
-          default:
-            return 0;
-            break
-        }
-      }
-
-      // 随机位置的最大值
-      let raio = 3000;
-      let height = 250;
-      return {
-        z: randomNum(500, raio),
-        x: randomNum(-height, height),
-        y: randomNum(-height, height)
-      }
+    const raio = 3000;
+    const height = 250;
+    const position = {
+      z: randomNum(500, raio),
+      x: randomNum(-height, height),
+      y: randomNum(-height, height)
     };
 
-    let tween = function () {
+    const tween = () => {
       new TWEEN.Tween(camera.position)
         .onComplete(tween)
         .easing(TWEEN.Easing.Back.InOut)
         .onUpdate(() => {
-          camera.lookAt({...group.position, ...{}})
+          camera.lookAt(group.position)
         })
-        .to(rand(), Time)
+        .to(position, Time)
         .start()
     };
 
