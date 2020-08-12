@@ -1,4 +1,5 @@
-import { Lottery3d } from "./lib";
+import {Lottery3d} from "./package";
+
 function init() {
   // @ts-ignore
   const lottery3d = window.lottery3d = new Lottery3d({
@@ -22,6 +23,7 @@ function init() {
   })
   lottery3d.users = users
 }
+
 // @ts-ignore
 window.init = init
 init()

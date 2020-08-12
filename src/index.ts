@@ -1,4 +1,5 @@
-import { Sign3D } from "./lib";
+import {Sign3D} from "./package";
+
 function init() {
   // @ts-ignore
   const sign3d = window.sign3d = new Sign3D({
@@ -25,6 +26,7 @@ function init() {
     }
   ];
 }
+
 // @ts-ignore
 window.init = init
 init();

@@ -5,7 +5,7 @@ import pkg from './package.json'
 
 export default [
   {
-    input: 'src/lib/index.ts',
+    input: 'src/package/index.ts',
     external: ['lodash', 'three', '@tweenjs/tween.js'],
     output: [
       { file: pkg.main, format: 'cjs' }
