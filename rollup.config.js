@@ -1,19 +1,19 @@
-import typescript from 'rollup-plugin-typescript'
+import typescript from 'rollup-plugin-typescript';
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
-import pkg from './package.json'
+import pkg from './package.json';
 
 export default [
   {
     input: 'src/packages/index.ts',
-    external: ['lodash', 'three', '@tweenjs/tween.js'],
+    external: Object.keys(pkg.dependencies),
     output: [
       { file: pkg.main, format: 'cjs' }
     ],
     plugins: [
       commonjs({
         namedExports: {
-          './src/packages/utils/postprocessing': [
+          './src/packages/three/utils/postprocessing': [
             'EffectComposer', 'RenderPass',
             'GodRaysPass', 'KernelSize',
             'ClearMaskPass',
@@ -29,4 +29,4 @@ export default [
       typescript()
     ]
   }
-]
+];

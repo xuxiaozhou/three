@@ -27,12 +27,12 @@ import {
   ShaderPass,
   CopyMaterial,
   ClearMaskPass
-} from '../utils/postprocessing'
+} from './utils/postprocessing'
 import MeshText2D from './MeshText2D/MeshText2D'
-import {IConfig, IPosition, IShowOption, ITurnInfo, IUser} from "../type";
+import {IConfig, IPosition, IShowOption, ITurnInfo, IUser} from "./type";
 import Base from "./Base";
 import {Sphere} from './animate';
-import {defaultShowOptions} from '../utils/constant'
+import {defaultShowOptions} from './utils/constant'
 
 class Lottery3d extends Base {
   protected minCount: number = 100;

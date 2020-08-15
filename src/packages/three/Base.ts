@@ -10,7 +10,7 @@ import {
   SphereBufferGeometry,
   Matrix4
 } from 'three'
-import { IConfig, IUser } from "../type";
+import { IConfig, IUser } from "./type";
 
 abstract class Base {
   protected dom: HTMLElement;

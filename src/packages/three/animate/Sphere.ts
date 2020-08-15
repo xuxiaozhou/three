@@ -1,6 +1,6 @@
 import TWEEN from '@tweenjs/tween.js'
 import { Vector3, Object3D, Camera, Group, Math as tMath } from 'three'
-import { IOption } from "../../type";
+import { IOption } from "../type";
 
 export default class Sphere {
   private readonly camera: Camera;

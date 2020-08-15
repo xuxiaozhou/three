@@ -1,5 +1,5 @@
 import {Object3D} from 'three'
-import {IOption} from "../../type";
+import {IOption} from "../type";
 
 export default class Fadeout {
   public objs: any[];

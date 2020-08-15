@@ -1,5 +1,5 @@
 import {Camera, Group, Object3D} from 'three'
-import {IOption} from "../../type";
+import {IOption} from "../type";
 
 export default class Logo {
   private readonly group: Group;

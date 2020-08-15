@@ -1,5 +1,5 @@
 import {Object3D, Camera, Group, Vector3} from 'three'
-import {IOption} from "../../type";
+import {IOption} from "../type";
 
 export default class Grid {
   private readonly group: Group;

@@ -1,5 +1,5 @@
 import { Vector3, Object3D, Group, Camera } from 'three'
-import { IOption } from "../../type";
+import { IOption } from "../type";
 
 export default class Helix {
   private readonly group: Group;
