@@ -10,14 +10,6 @@ export function createId(pre: string = '') {
   return pre + guid()
 }
 
-export function wait(time: number = 1000) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve()
-    }, time)
-  })
-}
-
 export const createCanvas = (id: string, containerWidth: number, containerHeight: number): HTMLCanvasElement => {
   const element = window.document.createElement('canvas');
   element.id = id;

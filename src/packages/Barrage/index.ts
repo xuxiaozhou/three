@@ -1,26 +1,10 @@
-import Scene from "./Scene";
-import Sprite from "./Sprite";
+import Scene from "./element/Scene";
+import Sprite from "./element/Sprite";
 import {IGlobalConfig, ISpriteConfig, ICalcGlobalConfig} from "./interface";
 import {getRandomColor, mixConfig} from "./utils/utils";
 import {createCanvas} from "../utils/utils";
 import loadImage from "./utils/loadImage";
-
-const screenSpace = 32;
-
-const defaultGlobalConfig: IGlobalConfig = {
-  type: 'scroll',
-  lifeTime: 200,
-};
-
-const defaultSpriteConfig: ISpriteConfig = {
-  fontSize: 36,
-  fontFamily: 'Microsoft YaHei',
-  avatarSize: 50,
-  type: 'text',
-  padding: [12, 12, 12, 12],
-  radius: 20,
-  imageSize: 80,
-};
+import {defaultGlobalConfig, defaultSpriteConfig, screenSpace} from './utils/constant'
 
 class Barrage {
   private readonly scene: Scene;

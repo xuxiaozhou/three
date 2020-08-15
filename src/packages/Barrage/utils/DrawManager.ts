@@ -1,4 +1,5 @@
 import {IDrawOptions, IGlobalConfig, ISpriteConfig, ISize} from "../interface";
+import { imageAndTextSpace } from "./constant";
 
 export interface IRoundImageArgs {
   img: CanvasImageSource,
@@ -7,8 +8,6 @@ export interface IRoundImageArgs {
   imageWidth: number,
   imageHeight: number
 }
-
-const imageAndTextSpace = 12;
 
 class DrawManager {
   private globalConfig: IGlobalConfig;

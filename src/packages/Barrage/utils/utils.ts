@@ -1,8 +1,11 @@
-export const getRandomColor = (): string => (
-  'rgb(' + parseInt(String(Math.random() * 255)) + ','
-  + parseInt(String(Math.random() * 255)) + ','
-  + parseInt(String(Math.random() * 255)) + ')'
-);
+export const getRandomColor = (): string => {
+  const arr = [
+    parseInt(String(Math.random() * 255)),
+    parseInt(String(Math.random() * 255)),
+    parseInt(String(Math.random() * 255))
+  ];
+  return 'rgb(' + arr.join(',') + ')'  
+};
 
 export const mixConfig = (config, defaultConfig) => {
   Object.keys(defaultConfig).forEach(key => {

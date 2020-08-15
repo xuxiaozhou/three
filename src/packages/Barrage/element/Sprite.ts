@@ -1,7 +1,7 @@
-import {AvatarImage, IDrawOptions, IGlobalConfig, ISpriteConfig,} from "./interface";
-import DrawManager from "./utils/DrawManager";
-import {createId} from "../utils/utils";
-import loadImage from "./utils/loadImage";
+import {AvatarImage, IDrawOptions, IGlobalConfig, ISpriteConfig,} from "../interface";
+import DrawManager from "../utils/DrawManager";
+import {createId} from "../../utils/utils";
+import loadImage from "../utils/loadImage";
 
 // const employTrackSpaceX = 20;
 

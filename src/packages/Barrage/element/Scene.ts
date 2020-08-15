@@ -1,5 +1,5 @@
 import Sprite from "./Sprite";
-import {IGlobalConfig} from "./interface";
+import {IGlobalConfig} from "../interface";
 import TrackManager from "./TrackManager";
 
 class Scene {

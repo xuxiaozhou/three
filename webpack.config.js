@@ -9,7 +9,6 @@ module.exports = {
   entry: {
     main: './src/index.ts',
     sign3d: './src/sign3d.ts',
-    danmu: './src/danmu.ts',
     draw: './src/draw.ts',
     barrage: './src/barrage.ts',
     lottery3d: './src/lottery3d.ts'
@@ -47,11 +46,6 @@ module.exports = {
       template: 'template/template.html',
       filename: 'sign3d.html',
       chunks: ['sign3d']
-    }),
-    new HtmlWebpackPlugin({
-      template: 'template/template.html',
-      filename: 'danmu.html',
-      chunks: ['danmu']
     }),
     new HtmlWebpackPlugin({
       template: 'template/draw.html',
