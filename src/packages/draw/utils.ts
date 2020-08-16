@@ -13,14 +13,3 @@ export const getPoint = (e): IPoint => {
     y: e.clientY,
   }
 };
-
-export const loadImage = (src: string, callback: (image: HTMLImageElement | false) => void) => {
-  const image = new Image();
-  image.src = src;
-  image.onload = () => {
-    callback(image);
-  };
-  image.onerror = () => {
-    callback(false);
-  }
-};

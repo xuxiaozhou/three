@@ -39,43 +39,43 @@ class Lottery3d extends Base {
   private turnSelectData: object = {};
   private readonly showOption: IShowOption[];
   private scene2: Scene;
-  private GroupMask: Group
-  private shineGroup: Group
-  private ShineGroupMask: any
-  private GodRaysPass: any
-  private toneMappingPass: any
-  private Clock: Clock
-  protected passRenderer: any
-  private ready: boolean
-  private enableInit: boolean
-  private RotationSpeed: { x: number, y: number, z: number }
-  private fillStyle: string
-  private bgColor: string
-  private fontSize: string
-  private remove: boolean
-  private getPaichuConfig: () => boolean
+  private GroupMask: Group;
+  private shineGroup: Group;
+  private ShineGroupMask: any;
+  private GodRaysPass: any;
+  private toneMappingPass: any;
+  private Clock: Clock;
+  protected passRenderer: any;
+  private ready: boolean;
+  private enableInit: boolean;
+  private RotationSpeed: { x: number, y: number, z: number };
+  private readonly fillStyle: string;
+  private readonly bgColor: string;
+  private readonly fontSize: string;
+  private remove: boolean;
+  private readonly getPaichuConfig: () => boolean;
 
   public constructor(config: IConfig) {
     super(config);
-    this.getPaichuConfig = config.getPaichuConfig
-    this.remove = false
-    this.showOption = config.showOption || defaultShowOptions
-    this.shape = 'Circle'
-    this.minCount = config.minCount || 100
-    this.fillStyle = config.filleStyle || '#fff'
-    this.bgColor = config.bgColor
-    this.fontSize = config.fontSize || '30px'
+    this.getPaichuConfig = config.getPaichuConfig;
+    this.remove = false;
+    this.showOption = config.showOption || defaultShowOptions;
+    this.shape = 'Circle';
+    this.minCount = config.minCount || 100;
+    this.fillStyle = config.filleStyle || '#fff';
+    this.bgColor = config.bgColor;
+    this.fontSize = config.fontSize || '30px';
     this.render = this.render.bind(this)
   }
 
   private CaculatePosition(length) {
-    const Position = this.camera.position.clone()
+    const Position = this.camera.position.clone();
     return Position.setLength(length)
   }
 
   public destroy() {
-    super.destroy()
-    this.remove = true
+    super.destroy();
+    this.remove = true;
     window.removeEventListener('resize', this.onResize.bind(this), false)
   }
 
@@ -84,7 +84,7 @@ class Lottery3d extends Base {
     new TWEEN.Tween(this.camera.position)
       .easing(TWEEN.Easing.Bounce.Out)
       .to(this.CaculatePosition(3000), 800)
-      .start()
+      .start();
 
     new TWEEN.Tween(this.RotationSpeed)
       .easing(TWEEN.Easing.Exponential.Out)
@@ -95,41 +95,41 @@ class Lottery3d extends Base {
   public start(count: number) {
     return new Promise(async (resolve) => {
       if (this.ready !== true) {
-        this.callback('lottery not ready')
+        this.callback('lottery not ready');
         return
       }
-      const {group, shineGroup} = this
+      const {group} = this;
 
       try {
-        await this.LotteryInit()
+        await this.LotteryInit();
         TWEEN.removeAll()
       } catch (e) {
         return
       }
 
-      const max = 3000
+      const max = 3000;
       this.RotationSpeed = {
         x: random(0, max),
         y: random(0, max),
         z: random(0, max)
-      }
+      };
 
-      this.ready = false
-      this.callback('lottery starting')
+      this.ready = false;
+      this.callback('lottery starting');
 
       let Complete = async () => {
-        this.ready = false
-        let objs = this.shineGroup.children
+        this.ready = false;
+        let objs = this.shineGroup.children;
 
-        let users = []
-        this.callback('lottery awarding')
+        let users = [];
+        this.callback('lottery awarding');
 
         let pushShowUser = () => {
           for (let obj of objs) {
-            this.callback('showOne', obj._uInfo)
+            this.callback('showOne', obj._uInfo);
             users.push(obj._uInfo)
           }
-        }
+        };
 
         if (this.getPaichuConfig()) {
           // 中奖排除时的动作
@@ -137,18 +137,18 @@ class Lottery3d extends Base {
             // 完成每个头像挨个移除的动效
             await (() => {
               return new Promise(async resolve => {
-                let f
+                let f;
                 for (let obj of objs) {
                   await (() => {
                     return new Promise(R => {
                       setTimeout(() => {
                         f = this.removeElement(obj).then(() => {
                           this.callback('showOne', obj._uInfo)
-                        })
+                        });
                         R()
                       }, 200)
                     })
-                  })()
+                  })();
                   users.push(obj._uInfo)
                 }
                 // 最后一个remove结束之后执行
@@ -156,32 +156,32 @@ class Lottery3d extends Base {
                   resolve(res)
                 })
               })
-            })()
+            })();
           else {
             // 数量超过20个直接删除消失
             pushShowUser()
           }
           this.shineGroup.remove(...objs)
         } else {
-          pushShowUser()
+          pushShowUser();
           this.group.add(...objs)
         }
 
-        this.lotteryAfter()
+        this.lotteryAfter();
 
-        this.callback('lottery end')
+        this.callback('lottery end');
 
         resolve(users)
-      }
+      };
 
       new TWEEN.Tween()
         .onUpdate(() => {
-          let speed = this.RotationSpeed
-          let isEmpty = true
+          let speed = this.RotationSpeed;
+          let isEmpty = true;
           for (let index in speed) {
-            let item = speed[index] * 0.0001
-            item = item > 0 ? item : 0
-            group.rotation[index] += item
+            let item = speed[index] * 0.0001;
+            item = item > 0 ? item : 0;
+            group.rotation[index] += item;
             // 判断当前速度是否还有效
             if (item > 0) {
               isEmpty = false
@@ -189,16 +189,16 @@ class Lottery3d extends Base {
           }
 
           // 恢复原来的状态
-          let shineChildren = shineGroup.children
-          shineChildren.length > 0 && group.add(...shineChildren)
-          shineGroup.remove(...shineChildren)
-          let paixuObj = this.getNearstObj(count)
+          let shineChildren = this.shineGroup.children;
+          shineChildren.length > 0 && group.add(...shineChildren);
+          this.shineGroup.remove(...shineChildren);
+          let paixuObj = this.getNearstObj(count);
 
-          shineGroup.add(...paixuObj)
+          this.shineGroup.add(...paixuObj);
 
           // 判断是否速度都为0 结束游戏
           if (isEmpty) {
-            TWEEN.removeAll()
+            TWEEN.removeAll();
             Complete()
           }
         })
@@ -213,17 +213,17 @@ class Lottery3d extends Base {
   private LotteryInit() {
     return new Promise(resolve => {
       if (this.enableInit) {
-        this.callback('lottery prepare')
+        this.callback('lottery prepare');
         return
       }
-      this.enableInit = true
-      let group = this.group
-      group.add(this.shineGroup)
-      this.GodRaysPass.renderPassMask = this.ShineGroupMask
+      this.enableInit = true;
+      let group = this.group;
+      group.add(this.shineGroup);
+      this.GodRaysPass.renderPassMask = this.ShineGroupMask;
 
-      this.toneMappingPass.enabled = true
+      this.toneMappingPass.enabled = true;
 
-      TWEEN.removeAll()
+      TWEEN.removeAll();
 
       new TWEEN.Tween(this.camera.position)
         .easing(TWEEN.Easing.Cubic.Out)
@@ -232,7 +232,7 @@ class Lottery3d extends Base {
           this.camera.lookAt(group.position)
         })
         .onComplete(() => {
-          this.enableInit = false
+          this.enableInit = false;
           resolve()
         })
         .start()
@@ -244,10 +244,10 @@ class Lottery3d extends Base {
    * 抽奖动画结束后的处理
    */
   private async lotteryAfter() {
-    this.callback('lottery waiting')
+    this.callback('lottery waiting');
     await (() => {
       return new Promise(resolve => {
-        TWEEN.removeAll()
+        TWEEN.removeAll();
         new TWEEN.Tween(this.camera.position)
           .easing(TWEEN.Easing.Cubic.Out)
           .to(this.CaculatePosition(3000), 500)
@@ -256,10 +256,10 @@ class Lottery3d extends Base {
           })
           .start()
       })
-    })()
-    this.GodRaysPass.renderPassMask = this.GroupMask
-    this.toneMappingPass.enabled = false
-    this.group.remove(this.shineGroup)
+    })();
+    this.GodRaysPass.renderPassMask = this.GroupMask;
+    this.toneMappingPass.enabled = false;
+    this.group.remove(this.shineGroup);
     this.transform(new Sphere({
       counter: this.group.children.length,
       group: this.group,
@@ -270,8 +270,8 @@ class Lottery3d extends Base {
 
   private removeElement(obj) {
     return new Promise(resolve => {
-      let camera = this.camera.clone()
-      let cameraPosition = this.group.worldToLocal(camera.position)
+      let camera = this.camera.clone();
+      let cameraPosition = this.group.worldToLocal(camera.position);
 
       new TWEEN.Tween(obj.position)
         .easing(TWEEN.Easing.Back.In)
@@ -279,13 +279,13 @@ class Lottery3d extends Base {
         .onComplete(() => {
           resolve()
         })
-        .start()
+        .start();
 
-      let newObj = obj.clone()
-      newObj.lookAt(cameraPosition)
+      let newObj = obj.clone();
+      newObj.lookAt(cameraPosition);
 
       // newObj.lookAt(camera.position)
-      let {x, y, z} = newObj.rotation
+      let {x, y, z} = newObj.rotation;
 
       new TWEEN.Tween(obj.rotation)
         .to({x, y, z}, 800)
@@ -297,21 +297,21 @@ class Lottery3d extends Base {
    * 获取离摄像机最近的n个元素
    */
   private getNearstObj(n, uInfo = true) {
-    let group = this.group
-    let camera = this.camera
+    let group = this.group;
+    let camera = this.camera;
     let paixuObj = orderBy(group.children, obj => {
       if (obj._uInfo || uInfo === false) {
-        let vector = new Vector3()
-        vector.subVectors(obj.getWorldPosition(), camera.position)
+        let vector = new Vector3();
+        vector.subVectors(obj.getWorldPosition(), camera.position);
         return vector.length()
       }
-    }, 'asc')
+    }, 'asc');
     paixuObj = filter(take(paixuObj, n), function (o) {
       if (uInfo === false) {
         return true
       }
       return typeof o._uInfo !== 'undefined'
-    })
+    });
     return paixuObj
   }
 
@@ -320,7 +320,7 @@ class Lottery3d extends Base {
       try {
         let targets = target.objs;
         TWEEN.removeAll();
-        this.ready = false
+        this.ready = false;
         target.scale && this.group.scale.set(target.scale, target.scale, target.scale);
 
         let objarr = this.group.children;
@@ -353,7 +353,7 @@ class Lottery3d extends Base {
 
         setTimeout(() => {
           target.cameraRotation && target.cameraRotation();
-          this.ready = true
+          this.ready = true;
           resolve()
         }, duration * 2)
       } catch (e) {
@@ -439,7 +439,7 @@ class Lottery3d extends Base {
         })
       } else {
         const output = await this.turnOutPut(user);
-        const config: { bgColor?: string } = {}
+        const config: { bgColor?: string } = {};
         if (this.bgColor) {
           config.bgColor = this.bgColor
         }
@@ -449,7 +449,7 @@ class Lottery3d extends Base {
           fillStyle: this.fillStyle,
           antialias: true,
           ...config
-        })
+        });
         mesh._uInfo = user
       }
       mesh.material.alphaTest = 0.1;
@@ -517,7 +517,7 @@ class Lottery3d extends Base {
   }
 
   protected createPassRender() {
-    const {renderer} = this
+    const {renderer} = this;
     // 创建光源 设为透明
     const sunMaterial = new PointsMaterial({
       size: 0,
@@ -526,45 +526,45 @@ class Lottery3d extends Base {
       alphaTest: 0,
       transparent: true,
       fog: false
-    })
-    const sunGeometry = new BufferGeometry()
-    sunGeometry.addAttribute('position', new BufferAttribute(new Float32Array(3), 3))
-    const sun = new Points(sunGeometry, sunMaterial)
+    });
+    const sunGeometry = new BufferGeometry();
+    sunGeometry.addAttribute('position', new BufferAttribute(new Float32Array(3), 3));
+    const sun = new Points(sunGeometry, sunMaterial);
 
     // 超出摄像机部分不渲染
-    sun.frustumCulled = true
-    sun.position.set(0, 0, 100)
-    this.scene2 = new Scene()
-    this.scene.add(sun)
-    this.scene.add(this.group)
+    sun.frustumCulled = true;
+    sun.position.set(0, 0, 100);
+    this.scene2 = new Scene();
+    this.scene.add(sun);
+    this.scene.add(this.group);
 
-    const composer = new EffectComposer(renderer, {stencilBuffer: true,})
-    const clearMaskPass = new ClearMaskPass()
-    const renderPass = new RenderPass(this.scene, this.camera)
-    const renderPass2 = new RenderPass(this.scene2, this.camera)
-    renderPass2.clear = false
+    const composer = new EffectComposer(renderer, {stencilBuffer: true,});
+    const clearMaskPass = new ClearMaskPass();
+    const renderPass = new RenderPass(this.scene, this.camera);
+    const renderPass2 = new RenderPass(this.scene2, this.camera);
+    renderPass2.clear = false;
 
-    const effectCopy = new ShaderPass(new CopyMaterial())
-    effectCopy.renderToScreen = true
+    const effectCopy = new ShaderPass(new CopyMaterial());
+    effectCopy.renderToScreen = true;
 
     const toneMappingPass = new ToneMappingPass({
       adaptive: false,
       resolution: 1,
       distinction: 1
-    })
-    toneMappingPass.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3
-    toneMappingPass.toneMappingMaterial.uniforms.maxLuminance.value = 3
-    toneMappingPass.toneMappingMaterial.uniforms.middleGrey.value = .8
-    this.toneMappingPass = toneMappingPass
+    });
+    toneMappingPass.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3;
+    toneMappingPass.toneMappingMaterial.uniforms.maxLuminance.value = 3;
+    toneMappingPass.toneMappingMaterial.uniforms.middleGrey.value = .8;
+    this.toneMappingPass = toneMappingPass;
 
     const toneMappingPass2 = new ToneMappingPass({
       adaptive: false,
       resolution: 1,
       distinction: 100
-    })
-    toneMappingPass2.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3
-    toneMappingPass2.toneMappingMaterial.uniforms.maxLuminance.value = 3
-    toneMappingPass2.toneMappingMaterial.uniforms.middleGrey.value = 80
+    });
+    toneMappingPass2.adaptiveLuminosityMaterial.uniforms.minLuminance.value = 3;
+    toneMappingPass2.toneMappingMaterial.uniforms.maxLuminance.value = 3;
+    toneMappingPass2.toneMappingMaterial.uniforms.middleGrey.value = 80;
 
     const GodPass = new GodRaysPass(this.group, this.camera, sun, {
       resolutionScale: 0.8,
@@ -576,40 +576,40 @@ class Lottery3d extends Base {
       exposure: 0.6,
       samples: 60,
       clampMax: 1.0
-    })
+    });
 
     // 设置 renderPassMask 照出的部分设置颜色
     this.GroupMask = new RenderPass(GodPass.mainScene, GodPass.mainCamera, {
       clearColor: new Color(0x000000)
-    })
+    });
 
-    this.shineGroup = new Group()
+    this.shineGroup = new Group();
 
     this.ShineGroupMask = new RenderPass(this.shineGroup, GodPass.mainCamera, {
       clearColor: new Color(0x000000)
-    })
+    });
 
-    GodPass.renderPassMask = this.GroupMask
-    this.GodRaysPass = GodPass
+    GodPass.renderPassMask = this.GroupMask;
+    this.GodRaysPass = GodPass;
 
     // composer.addPass(renderBg)
-    composer.addPass(renderPass)
-    composer.addPass(renderPass2)
+    composer.addPass(renderPass);
+    composer.addPass(renderPass2);
 
-    composer.addPass(new MaskPass(this.scene, this.camera))
-    toneMappingPass.enabled = false
-    composer.addPass(toneMappingPass)
-    composer.addPass(clearMaskPass)
+    composer.addPass(new MaskPass(this.scene, this.camera));
+    toneMappingPass.enabled = false;
+    composer.addPass(toneMappingPass);
+    composer.addPass(clearMaskPass);
 
-    composer.addPass(new MaskPass(this.shineGroup, this.camera))
-    composer.addPass(toneMappingPass2)
-    composer.addPass(clearMaskPass)
+    composer.addPass(new MaskPass(this.shineGroup, this.camera));
+    composer.addPass(toneMappingPass2);
+    composer.addPass(clearMaskPass);
 
-    composer.addPass(GodPass)
+    composer.addPass(GodPass);
 
-    composer.addPass(effectCopy)
+    composer.addPass(effectCopy);
 
-    this.Clock = new Clock()
+    this.Clock = new Clock();
 
     this.passRenderer = composer
   }
