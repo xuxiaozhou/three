@@ -1,4 +1,6 @@
 import {
+  Matrix4,
+  SphereBufferGeometry,
   PerspectiveCamera,
   WebGLRenderer,
   Group,
@@ -13,55 +15,102 @@ import {
   BufferGeometry,
   BufferAttribute,
   Points,
-  Color
+  Color,
+  Texture,
+  TextureLoader,
 } from "three";
 import TWEEN from '@tweenjs/tween.js'
 import _ from 'lodash'
-import { EffectComposer, RenderPass, GodRaysPass, KernelSize } from './utils/postprocessing'
+import {EffectComposer, RenderPass, GodRaysPass, KernelSize} from './utils/postprocessing'
 import Fadeout from "./animate/Fadeout";
 import * as animatesEffect from './animate'
-import { IConfig, IUser, IOption, IPosition } from "./type";
-import Base from "./Base";
+import {IUser, IOption, IPosition} from "./type";
+import {mixConfig} from "../utils/utils";
 
 const TWEEN2 = new TWEEN.Group();
 
-class Sign3D extends Base {
+type IAnimate = 'Sphere' | 'Logo' | 'Artascope' | 'Grid' | 'Helix'
+
+interface ISign3DConfig {
+  container?: HTMLElement,
+  backgroundImage?: string,
+  backgroundType?: '2D' | '3D',
+  shape?: 'Circle' | 'Round',
+  openAnimates?: IAnimate[],
+  animateSpendTime?: number,
+  tableData?: Array<[string, string]>,
+  shineColor?: string,
+  avatarSize?: number,
+  counter?: number,
+  cache?: (img: string) => string,
+  callback?: (type?: string, data?: any) => void
+}
+
+const defaultConfig: ISign3DConfig = {
+  backgroundType: '2D',
+  shape: 'Circle',
+  animateSpendTime: 15,
+  openAnimates: ['Sphere', 'Logo', 'Artascope', 'Grid', 'Helix'],
+  shineColor: '#FCECB7',
+  avatarSize: 35,
+  counter: 1000
+};
+
+class Sign3D {
   private objects: any[] = [];
-  private avatarSize: number = 35;
   private fadeout: Fadeout;
-  private readonly openAnimates: string[];
-  private readonly animateSpendTime: number;
   private nowAnimate: any;
 
   protected group: Group;
   protected scene: Scene;
-  protected counter: number = 1000;
   protected animationFrame: number;
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
-  private tableData: any[];
-  private shineColor: string
+
   protected passRenderer: any;
   private GodRaysPass: any;
   protected lodashAnimates: any;
-  private timer = null
+  private timer = null;
   private remove: boolean = false;
 
-  constructor(config: IConfig) {
-    super(config);
-    this.remove = false
-    this.shineColor = config.shineColor
-    this.tableData = config.tableData
-    const { animateSpendTime = 15, openAnimates } = config;
-    this.openAnimates = openAnimates;
-    this.animateSpendTime = animateSpendTime;
+  private readonly config: ISign3DConfig;
+  private $users: IUser[] = [];
+  private loaded: boolean = false;
+
+  public constructor(config: ISign3DConfig) {
+    this.config = mixConfig(config, defaultConfig);
+    this.group = new Group();
+    this.scene = new Scene();
+    this.remove = false;
     this.addUser = this.addUser.bind(this);
   }
 
+  public set users(users: IUser[]) {
+    this.$users = users;
+
+    if (users.length === 0) {
+      this.config.callback('info', 'not user');
+      return;
+    }
+
+    if (!this.loaded) {
+      this.config.callback('status', 'loading');
+      this.init()
+    }
+  }
+
   public destroy() {
-    super.destroy()
-    this.remove = true
-    this.lodashAnimates = null
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame)
+    }
+    this.renderer = null;
+    this.passRenderer = null;
+    if (this.config.container) {
+      this.config.container.innerHTML = '';
+      this.config.container.style.backgroundImage = ''
+    }
+    this.remove = true;
+    this.lodashAnimates = null;
     if (this.timer) {
       clearTimeout(this.timer)
     }
@@ -75,10 +124,10 @@ class Sign3D extends Base {
   public async addUser(user: IUser) {
     this.$users.push(user);
 
-    if (!this.scene) {
+    if (!this.loaded) {
       return
     }
-    const { camera } = this;
+    const {camera} = this;
     const object = await this.createMesh(user);
     this.scene.add(object);
     const replaceIndex = _.random(0, this.nowAnimate.objs.length - 1);
@@ -143,21 +192,21 @@ class Sign3D extends Base {
     initPorperty();
 
     // 移动到摄像机前 并跟随摄像机
-    let moveTo = new TWEEN.Tween({ value: 0 }, TWEEN2)
-      .to({ value: 100 }, 1000)
+    let moveTo = new TWEEN.Tween({value: 0}, TWEEN2)
+      .to({value: 100}, 1000)
       .onUpdate((data) => {
         followCamera(data)
       })
       .easing(TWEEN.Easing.Exponential.InOut);
-    let wait = new TWEEN.Tween({ value: 100 }, TWEEN2)
+    let wait = new TWEEN.Tween({value: 100}, TWEEN2)
       .onStart(initPorperty)
-      .to({ value: 100 }, 1000)
+      .to({value: 100}, 1000)
       .onUpdate((data) => {
         followCamera(data)
       });
 
-    let showing = new TWEEN.Tween({ value: 0 }, TWEEN2)
-      .to({ value: 100 }, 3000)
+    let showing = new TWEEN.Tween({value: 0}, TWEEN2)
+      .to({value: 100}, 3000)
       .onStart(() => {
         let newPosition = this.group.worldToLocal(object.position);
         let cameraPosition = this.group.worldToLocal(new Vector3().copy(camera.position));
@@ -186,14 +235,62 @@ class Sign3D extends Base {
     moveTo.start()
   }
 
+  private clampToMaxSize(image, maxSize?: number) {
+    if (image.width > maxSize || image.height > maxSize) {
+      const scale = maxSize / Math.max(image.width, image.height);
+      // @ts-ignore
+      const canvas: HTMLCanvasElement = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+      canvas.width = Math.floor(image.width * scale);
+      canvas.height = Math.floor(image.height * scale);
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.width);
+      if (this.config.shape === 'Circle') {
+        const pattern = context.createPattern(canvas, 'no-repeat');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.arc(canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2, 0, 2 * Math.PI);
+        context.fillStyle = pattern;
+        context.fill()
+      }
+      return canvas
+    }
+
+    return image
+  }
+
+  private getTexture(url: string, maxSize: false | number = false): Promise<Texture> {
+    return new Promise(async (res) => {
+      try {
+        url = this.config.cache(url);
+      } catch (e) {
+      }
+
+      let textTure;
+
+      // 第一种方式获取
+      textTure = new TextureLoader().load(
+        url, texture => {
+          if (maxSize !== false) {
+            textTure.image = this.clampToMaxSize(texture.image, maxSize);
+          }
+          res(textTure)
+        }, () => {
+        }, () => {
+          console.log('图片【' + url + '】下载错误');
+          res(textTure)
+        }
+      )
+    })
+  }
+
   private async createMesh(user: IUser, position: false | IPosition = false) {
     const map = await this.getTexture(user.avatar, 128);
     let Plane;
-    if (this.shape == 'Circle') {
-      const radius = this.avatarSize / 2;
+    const {avatarSize, shape} = this.config;
+    if (shape == 'Circle') {
+      const radius = avatarSize / 2;
       Plane = new CircleGeometry(radius, 30)
     } else {
-      Plane = new PlaneGeometry(this.avatarSize, this.avatarSize)
+      Plane = new PlaneGeometry(avatarSize, avatarSize)
     }
     const material = new MeshBasicMaterial({
       color: 0xffffff,
@@ -216,7 +313,7 @@ class Sign3D extends Base {
   }
 
   private async createMeshs() {
-    for (let i = 0; i < this.counter; i += 1) {
+    for (let i = 0; i < this.config.counter; i += 1) {
       const user = _.sample(this.$users);
       const object = await this.createMesh(user);
       this.group.add(object);
@@ -228,7 +325,6 @@ class Sign3D extends Base {
   private transform(target, duration) {
     return new Promise(resolve => {
       const targets = target.objs;
-      // this.globalAnimate = false
       TWEEN.removeAll();
       for (let i = 0; i < this.objects.length; i++) {
         let object = this.objects[i];
@@ -299,8 +395,8 @@ class Sign3D extends Base {
           z: 3000
         }, spendTime)
         .onComplete(() => {
-          this.GodRaysPass.godRaysMaterial.uniforms.density.value = 0.83
-          this.GodRaysPass.intensity = 0.4
+          this.GodRaysPass.godRaysMaterial.uniforms.density.value = 0.83;
+          this.GodRaysPass.intensity = 0.4;
           resolve()
         })
         .easing(TWEEN.Easing.Exponential.InOut)
@@ -312,6 +408,7 @@ class Sign3D extends Base {
     if (this.remove) {
       return
     }
+
     let animate = this.lodashAnimates.next().value;
     if (!animate) {
       this.lodashAnimates.__index__ = 0;
@@ -327,7 +424,7 @@ class Sign3D extends Base {
 
     this.timer = setTimeout(() => {
       this.loopAnimate()
-    }, (parseInt(String(this.animateSpendTime)) + 5) * 1000)
+    }, (parseInt(String(this.config.animateSpendTime)) + 5) * 1000)
   }
 
   private render() {
@@ -348,20 +445,46 @@ class Sign3D extends Base {
     this.renderer.render(this.scene, this.camera);
   }
 
+  private async initRender() {
+    try {
+      if (this.config.backgroundType === '3D') {
+        const texture = await this.getTexture(this.config.backgroundImage);
+        const material = new MeshBasicMaterial({map: texture});
+        const SkyBoxSize = 4000;
+        const skyBox = new Mesh(new SphereBufferGeometry(SkyBoxSize, 0, 0), material);
+        skyBox.applyMatrix(new Matrix4().makeScale(1, 1, -1));
+        this.scene.add(skyBox);
+      } else {
+        this.config.container.style.backgroundImage = `url(${this.config.backgroundImage})`;
+      }
+      this.camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 20, 10000);
+      this.camera.position.z = 3000;
+      this.renderer = new WebGLRenderer({alpha: true});
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.domElement.style.position = 'fixed';
+      this.renderer.domElement.style.left = '0px';
+      this.config.container.appendChild(this.renderer.domElement);
+      this.createPassRender()
+    } catch (e) {
+      this.config.callback('error', 'not support');
+      throw new Error('not support')
+    }
+  }
+
   private async initThree() {
     try {
       await this.initRender();
       const options: IOption = {
-        counter: this.counter,
+        counter: this.config.counter,
         group: this.group,
         camera: this.camera,
         rotationSpeed: 4,
-        shape: this.shape,
-        tableData: this.tableData
+        shape: this.config.shape,
+        tableData: this.config.tableData
       };
       this.fadeout = new Fadeout(options);
       const animates: any[] = [];
-      this.openAnimates.forEach(animate => {
+      this.config.openAnimates.forEach(animate => {
         const Animate = animatesEffect[animate];
         animates.push(new Animate(options))
       });
@@ -370,18 +493,19 @@ class Sign3D extends Base {
       this.loopAnimate();
       window.addEventListener('resize', this.onResize.bind(this), false)
     } catch (e) {
-      console.log(e)
+      // console.log(e)
     }
   }
 
   protected async init() {
-    this.initThree().then(() => {
-      this.render();
-    })
+    await this.initThree();
+    this.loaded = true;
+    this.config.callback('status', 'loaded');
+    this.render();
   }
 
   protected createPassRender() {
-    const { renderer } = this
+    const {renderer} = this;
     const sunMaterial = new PointsMaterial({
       size: 0,
       sizeAttenuation: true,
@@ -389,19 +513,19 @@ class Sign3D extends Base {
       alphaTest: 0,
       transparent: true,
       fog: false
-    })
-    const sunGeometry = new BufferGeometry()
-    sunGeometry.addAttribute('position', new BufferAttribute(new Float32Array(3), 3))
-    const sun = new Points(sunGeometry, sunMaterial)
+    });
+    const sunGeometry = new BufferGeometry();
+    sunGeometry.addAttribute('position', new BufferAttribute(new Float32Array(3), 3));
+    const sun = new Points(sunGeometry, sunMaterial);
 
     // 超出摄像机部分不渲染
-    sun.frustumCulled = true
-    sun.position.set(0, 0, -100)
-    this.scene.add(sun)
+    sun.frustumCulled = true;
+    sun.position.set(0, 0, -100);
+    this.scene.add(sun);
 
-    const composer = new EffectComposer(renderer)
-    let renderPass = new RenderPass(this.scene, this.camera)
-    composer.addPass(renderPass)
+    const composer = new EffectComposer(renderer);
+    let renderPass = new RenderPass(this.scene, this.camera);
+    composer.addPass(renderPass);
 
     renderPass = new GodRaysPass(this.group, this.camera, sun, {
       resolutionScale: 0.8,
@@ -413,16 +537,16 @@ class Sign3D extends Base {
       exposure: 0.6,
       samples: 60,
       clampMax: 1.0
-    })
+    });
 
     // 设置 renderPassMask 照出的部分设置颜色
     renderPass.renderPassMask = new RenderPass(renderPass.mainScene, renderPass.mainCamera, {
-      overrideMaterial: new MeshBasicMaterial({ color: this.shineColor }),
+      overrideMaterial: new MeshBasicMaterial({color: this.config.shineColor}),
       clearColor: new Color(0x000000)
-    })
-    this.GodRaysPass = renderPass
-    composer.addPass(renderPass)
-    renderPass.renderToScreen = true
+    });
+    this.GodRaysPass = renderPass;
+    composer.addPass(renderPass);
+    renderPass.renderToScreen = true;
     this.passRenderer = composer
   }
 }
