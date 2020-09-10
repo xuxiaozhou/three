@@ -1,4 +1,4 @@
-import {Sign3D} from "./packages";
+import {Sign3D} from "../packages";
 
 function init() {
   // @ts-ignore

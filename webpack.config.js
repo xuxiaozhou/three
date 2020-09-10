@@ -7,11 +7,11 @@ const resolve = (pathName) => (
 
 module.exports = {
   entry: {
-    main: './src/index.ts',
-    sign3d: './src/sign3d.ts',
-    draw: './src/draw.ts',
-    barrage: './src/barrage.ts',
-    lottery3d: './src/lottery3d.ts'
+    main: './src/view/index.ts',
+    sign3d: './src/view/sign3d.ts',
+    draw: './src/view/draw.ts',
+    barrage: './src/view/barrage.ts',
+    lottery3d: './src/view/lottery3d.ts'
   },
   output: {
     filename: '[name].js',
