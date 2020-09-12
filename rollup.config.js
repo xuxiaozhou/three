@@ -1,26 +1,10 @@
-import typescript from 'rollup-plugin-typescript'
+import typescript from 'rollup-plugin-typescript';
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
 
-
-// commonjs({
-//   namedExports: {
-//     './src/packages/three/utils/postprocessing': [
-//       'EffectComposer', 'RenderPass',
-//       'GodRaysPass', 'KernelSize',
-//       'ClearMaskPass',
-//       'ShaderPass',
-//       'MaskPass',
-//       'ToneMappingPass',
-//       'CopyMaterial',
-//
-//     ]
-//   }
-// }),
-
 const generateConfig = (entry, outputName) => ({
-  input: `packages/${entry}`,
+  input: `src/packages/${entry}`,
   external: Object.keys(pkg.dependencies),
   output: [
     {
@@ -29,19 +13,32 @@ const generateConfig = (entry, outputName) => ({
     }
   ],
   plugins: [
-    commonjs(),
+    commonjs({
+      namedExports: {
+        './src/packages/three/utils/postprocessing': [
+          'EffectComposer', 'RenderPass',
+          'GodRaysPass', 'KernelSize',
+          'ClearMaskPass',
+          'ShaderPass',
+          'MaskPass',
+          'ToneMappingPass',
+          'CopyMaterial',
+
+        ]
+      }
+    }),
     nodeResolve(),
     typescript()
   ]
 });
 
 const map = {
-  Draw: 'Draw/index.ts',
-  Lottery3d: 'Lottery3d/index.ts',
-  Sign3D: 'Sign3D/index.ts',
-  Barrage: 'Barrage/index.ts',
-  request: 'utils/request.ts',
-  socket: 'utils/socket.ts',
+  // Draw: 'Draw/index.ts',
+  // Lottery3d: 'Lottery3d/index.ts',
+  // Sign3D: 'Sign3D/index.ts',
+  // Barrage: 'Barrage/index.ts',
+  // request: 'utils/request.ts',
+  // socket: 'utils/socket.ts',
   hudong: 'index.ts',
 };
 

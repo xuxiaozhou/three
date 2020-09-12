@@ -4,8 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const resolve = (pathName) => (
   path.resolve(__dirname, pathName)
 );
-
-const entry = ['index', 'lottery3d', 'danmu', 'draw', 'sign3d'];
+// , 'danmu', 'draw',
+const entry = ['index', 'lottery3d', 'sign3d'];
 
 const htmlPlugins = entry.map(name => {
   return new HtmlWebpackPlugin({
@@ -17,7 +17,7 @@ const htmlPlugins = entry.map(name => {
 
 const entries = entry.reduce((obj, name) => ({
   ...obj,
-  [name]: `./src/${name}.js`
+  [name]: `./src/view/${name}.ts`
 }), {});
 
 module.exports = {
