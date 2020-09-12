@@ -1,3 +1,6 @@
-// export {default as Lottery3d} from './three/Lottery3d'
+export {default as Lottery3d} from './three/Lottery3d'
 export {default as Sign3D} from './three/Sign3D'
 export {default as Draw} from './draw'
+export {default as request} from './utils/request'
+export {default as locale} from './utils/locale'
+export {default as ws} from './utils/ws'

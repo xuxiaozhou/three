@@ -53,7 +53,8 @@ const defaultConfig: ISign3DConfig = {
   openAnimates: ['Sphere', 'Logo', 'Artascope', 'Grid', 'Helix'],
   shineColor: '#FCECB7',
   avatarSize: 35,
-  counter: 1000
+  counter: 1000,
+  cache: img => img
 };
 
 class Sign3D {
@@ -61,8 +62,8 @@ class Sign3D {
   private fadeout: Fadeout;
   private nowAnimate: any;
 
-  protected group: Group;
-  protected scene: Scene;
+  protected group: Group = new Group();
+  protected scene: Scene = new Scene();
   protected animationFrame: number;
   protected camera: PerspectiveCamera;
   protected renderer: WebGLRenderer;
@@ -79,10 +80,8 @@ class Sign3D {
 
   public constructor(config: ISign3DConfig) {
     this.config = mixConfig(config, defaultConfig);
-    this.group = new Group();
-    this.scene = new Scene();
-    this.remove = false;
     this.addUser = this.addUser.bind(this);
+    this.onResize = this.onResize.bind(this)
   }
 
   public set users(users: IUser[]) {
@@ -114,7 +113,7 @@ class Sign3D {
     if (this.timer) {
       clearTimeout(this.timer)
     }
-    window.removeEventListener('resize', this.onResize.bind(this), false)
+    window.removeEventListener('resize', this.onResize, false)
   }
 
   /**
@@ -125,15 +124,17 @@ class Sign3D {
     this.$users.push(user);
 
     if (!this.loaded) {
+      this.config.callback('tip', 'not ready')
       return
     }
+
     const {camera} = this;
     const object = await this.createMesh(user);
     this.scene.add(object);
     const replaceIndex = _.random(0, this.nowAnimate.objs.length - 1);
     let replaceObj = this.objects[replaceIndex];
 
-    let porperty = {};
+    let property = {};
 
     // 间隔200
     let length = 200;
@@ -157,13 +158,13 @@ class Sign3D {
     function followCamera(data) {
       // 根据相机朝向 算出物品所在的相对位置
       let relative = CaculatePosition(camera, length);
-      for (let index in porperty) {
-        for (let type in porperty[index]) {
+      for (let index in property) {
+        for (let type in property[index]) {
           if (index === 'rotation') {
-            object[index][type] = (camera[index][type] - porperty[index][type]) * data.value / 100 + porperty[index][type]
+            object[index][type] = (camera[index][type] - property[index][type]) * data.value / 100 + property[index][type]
           }
           if (index === 'position') {
-            object[index][type] = (relative[type] + randNum[type] - porperty[index][type]) * data.value / 100 + porperty[index][type]
+            object[index][type] = (relative[type] + randNum[type] - property[index][type]) * data.value / 100 + property[index][type]
           }
         }
       }
@@ -172,10 +173,10 @@ class Sign3D {
     /**
      * 初始化porperty 便于下次动画计算初始值与结束值
      */
-    function initPorperty(world = false) {
+    function initProperty(world = false) {
       let position = world ? object.getWorldPosition() : object.position;
       let rotation = world ? object.getWorldRotation() : object.rotation;
-      porperty = {
+      property = {
         position: {
           x: position.x,
           y: position.y,
@@ -189,7 +190,7 @@ class Sign3D {
       }
     }
 
-    initPorperty();
+    initProperty();
 
     // 移动到摄像机前 并跟随摄像机
     let moveTo = new TWEEN.Tween({value: 0}, TWEEN2)
@@ -199,7 +200,7 @@ class Sign3D {
       })
       .easing(TWEEN.Easing.Exponential.InOut);
     let wait = new TWEEN.Tween({value: 100}, TWEEN2)
-      .onStart(initPorperty)
+      .onStart(initProperty)
       .to({value: 100}, 1000)
       .onUpdate((data) => {
         followCamera(data)
@@ -213,12 +214,12 @@ class Sign3D {
         this.group.add(object);
         object.position.copy(newPosition);
         object.lookAt(cameraPosition);
-        initPorperty()
+        initProperty()
       })
       .onUpdate((data) => {
-        for (let index in porperty) {
-          for (let type in porperty[index]) {
-            object[index][type] = (replaceObj[index][type] - porperty[index][type]) * data.value / 100 + porperty[index][type]
+        for (let index in property) {
+          for (let type in property[index]) {
+            object[index][type] = (replaceObj[index][type] - property[index][type]) * data.value / 100 + property[index][type]
           }
         }
       })
@@ -333,6 +334,8 @@ class Sign3D {
         if (typeof (target) == 'undefined') {
           continue
         }
+
+        // 改变位置
         new TWEEN.Tween(object.position)
           .to({
             x: target.position.x,
@@ -342,6 +345,7 @@ class Sign3D {
           .easing(TWEEN.Easing.Exponential.InOut)
           .start();
 
+        // 改变旋转
         new TWEEN.Tween(object.rotation)
           .to({
             x: target.rotation.x,
@@ -466,45 +470,44 @@ class Sign3D {
       this.config.container.appendChild(this.renderer.domElement);
       this.createPassRender()
     } catch (e) {
-      this.config.callback('error', 'not support');
       throw new Error('not support')
     }
   }
 
-  private async initThree() {
+  private prepareAnimate() {
+    const options: IOption = {
+      counter: this.config.counter,
+      group: this.group,
+      camera: this.camera,
+      rotationSpeed: 4,
+      shape: this.config.shape,
+      tableData: this.config.tableData
+    };
+    this.fadeout = new Fadeout(options);
+    const animates: any[] = [];
+    this.config.openAnimates.forEach(animate => {
+      const Animate = animatesEffect[animate];
+      animates.push(new Animate(options))
+    });
+    this.lodashAnimates = _(animates);
+  }
+
+  private async init() {
     try {
       await this.initRender();
-      const options: IOption = {
-        counter: this.config.counter,
-        group: this.group,
-        camera: this.camera,
-        rotationSpeed: 4,
-        shape: this.config.shape,
-        tableData: this.config.tableData
-      };
-      this.fadeout = new Fadeout(options);
-      const animates: any[] = [];
-      this.config.openAnimates.forEach(animate => {
-        const Animate = animatesEffect[animate];
-        animates.push(new Animate(options))
-      });
-      this.lodashAnimates = _(animates);
+      this.prepareAnimate();
       await this.createMeshs();
       this.loopAnimate();
-      window.addEventListener('resize', this.onResize.bind(this), false)
+      window.addEventListener('resize', this.onResize, false);
+      this.loaded = true;
+      this.config.callback('status', 'loaded');
+      this.render();
     } catch (e) {
-      // console.log(e)
+      this.config.callback('error', 'not support');
     }
   }
 
-  protected async init() {
-    await this.initThree();
-    this.loaded = true;
-    this.config.callback('status', 'loaded');
-    this.render();
-  }
-
-  protected createPassRender() {
+  private createPassRender() {
     const {renderer} = this;
     const sunMaterial = new PointsMaterial({
       size: 0,
