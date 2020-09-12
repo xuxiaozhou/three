@@ -1,7 +1,23 @@
-import typescript from 'rollup-plugin-typescript2';
+import typescript from 'rollup-plugin-typescript'
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
+
+
+// commonjs({
+//   namedExports: {
+//     './src/packages/three/utils/postprocessing': [
+//       'EffectComposer', 'RenderPass',
+//       'GodRaysPass', 'KernelSize',
+//       'ClearMaskPass',
+//       'ShaderPass',
+//       'MaskPass',
+//       'ToneMappingPass',
+//       'CopyMaterial',
+//
+//     ]
+//   }
+// }),
 
 const generateConfig = (entry, outputName) => ({
   input: `packages/${entry}`,
