@@ -1,7 +1,7 @@
 {
   "name": "hudong-three",
-  "version": "1.0.19",
-  "main": "dist/hudong.js",
+  "version": "1.0.20",
+  "main": "lib/hudong.js",
   "description": "互动所用到的应用",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
