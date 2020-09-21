@@ -124,7 +124,7 @@ class Sign3D {
     this.$users.push(user);
 
     if (!this.loaded) {
-      this.config.callback('tip', 'not ready')
+      this.config.callback('tip', 'not ready');
       return
     }
 
