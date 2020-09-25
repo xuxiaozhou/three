@@ -1,6 +1,6 @@
 {
   "name": "hudong-three",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "main": "lib/hudong.js",
   "description": "互动所用到的应用",
   "scripts": {

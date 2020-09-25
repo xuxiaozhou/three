@@ -19,10 +19,6 @@ export const createCanvas = (id: string, containerWidth: number, containerHeight
   return element;
 };
 
-export const randomColor = () => (
-  'rgb(' + parseInt(String(Math.random() * 255)) + ',' + parseInt(String(Math.random() * 255)) + ',' + parseInt(String(Math.random() * 255)) + ')'
-);
-
 export const mixConfig = (config = {}, defaultConfig = {}) => {
   Object.keys(defaultConfig).forEach(key => {
     if (typeof config[key] === 'undefined') {
