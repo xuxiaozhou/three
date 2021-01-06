@@ -22,7 +22,7 @@
   "homepage": "https://github.com/xuxiaozhou/three#readme",
   "dependencies": {
     "@tweenjs/tween.js": "^17.1.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "lodash": "^4.17.15",
     "store": "^2.0.12",
     "three": "^0.87.1"
