@@ -25,7 +25,7 @@
     "axios": "^0.20.0",
     "lodash": "^4.17.15",
     "store": "^2.0.12",
-    "three": "^0.87.1"
+    "three": "^0.125.0"
   },
   "devDependencies": {
     "@types/node": "^14.10.1",
